@@ -1,27 +1,32 @@
-# Domain Backstory v5
+# Domain Backstory v6
 
-This version shifts the tool toward domain-change investigation rather than raw OSINT output.
+Rebuilt around the information that is actually useful during sender-domain triage.
 
-## New in v5
-- Wayback is explicitly explained as an archived copy of a website, **not** a site-creation date or ownership signal.
-- Added a **Change Cluster** section emphasizing that a registrar change alone is not suspicious.
-- Added deeper history pivots:
-  - DomainTools WHOIS
-  - SecurityTrails domain history
-  - ICANN RDAP lookup
-- The app tells the analyst what to look for: registrar, registrant/organization, nameserver, privacy-status, and site-identity changes.
-- Historical ownership is not auto-claimed because public RDAP does not reliably provide it.
+## Primary data
+- Domain creation date
+- Domain last-changed date
+- Registry expiration
+- Registrar expiration (when supplied)
+- RDAP database update date
+- Registrar + IANA ID
+- Registrar entity creation/change dates (only when RDAP actually supplies them)
+- Nameservers + domain status
+- Current DNS: A, AAAA, MX, NS, CNAME, SOA
+- Lightweight Wayback archived-copy evidence
+
+## Reliability improvements
+- RDAP first uses the official IANA RDAP bootstrap to reach the registry directly.
+- `rdap.org` is only a fallback.
+- DNS uses Cloudflare DNS-over-HTTPS.
+- CT is optional enrichment rather than a required source.
+
+## Reputation pivots
+- Cisco Talos button opens Talos Reputation Center.
+  Talos documents public lookup rate limits and disallows scraping, so v6 does not automate it.
+- VirusTotal button opens the direct GUI domain report; no API key is stored.
+- DomainTools / SecurityTrails buttons are for historical WHOIS / ownership changes.
+- Wayback opens full history for visual identity comparison.
 
 ## Update
-Replace the existing GitHub repo with these files, commit, and push. Cloudflare should redeploy automatically.
-
-Repo structure:
-```
-domain-backstory/
-├── package.json
-├── wrangler.jsonc
-├── public/
-│   └── index.html
-└── src/
-    └── index.js
-```
+Replace your existing GitHub repo contents with this ZIP and push.
+Cloudflare should redeploy the same Worker URL automatically.
