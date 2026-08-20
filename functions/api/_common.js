@@ -1,0 +1,3 @@
+export function out(data,status=200){return new Response(JSON.stringify(data),{status,headers:{"content-type":"application/json","cache-control":"no-store"}})}
+export function domainOf(r){const d=(new URL(r.url).searchParams.get("domain")||"").trim().toLowerCase();return d&&d.includes(".")&&!/[\/@ :]/.test(d)?d:null}
+export async function fj(url,ms=20000){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms);try{const r=await fetch(url,{headers:{"accept":"application/json","user-agent":"DomainBackstory/1.0"},signal:c.signal});if(!r.ok)throw new Error("Provider HTTP "+r.status);return await r.json()}finally{clearTimeout(t)}}
