@@ -79,6 +79,16 @@ summary{cursor:pointer;color:#c9baff;font-weight:700}
 .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;overflow-wrap:anywhere;color:#ddd8ef}
 @media(max-width:900px){.lifecycle,.comparegrid,.infra{grid-template-columns:1fr 1fr}}
 @media(max-width:780px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.comparegrid,.infra,.rawdns{grid-template-columns:1fr}.notes{grid-template-columns:1fr}.hero{display:block}.badge{display:inline-block;margin-top:10px}.search{flex-wrap:wrap}.search input{min-width:100%}.lifecycle{grid-template-columns:1fr}}
+
+#topBtn{
+ position:fixed;right:22px;bottom:22px;z-index:20;
+ width:48px;height:48px;border-radius:999px;padding:0;
+ display:none;align-items:center;justify-content:center;
+ background:var(--accent);color:#120d18;font-size:21px;font-weight:900;
+ box-shadow:0 10px 28px rgba(0,0,0,.35);border:0;
+}
+#topBtn.show{display:flex}
+
 </style>
 </head>
 <body><div class="wrap">
@@ -153,6 +163,7 @@ summary{cursor:pointer;color:#c9baff;font-weight:700}
   <div class="actions"><button id="save">Save locally</button><button class="secondary" id="copy">Copy summary</button></div><span id="saved" class="muted"></span>
  </section>
 </div></div>
+<button id="topBtn" aria-label="Scroll to top" title="Back to top">↑</button>
 
 <script>
 const $=s=>document.querySelector(s); let current=null, parsedHeader=null;
@@ -205,7 +216,7 @@ async function investigate(){
  ["rdap","infra","wb","timeline","lifecycle"].forEach(id=>$("#"+id).textContent="Looking up…");$("#signal").textContent="Building context…";$("#flags").innerHTML="";$("#ctResult").textContent="";
  status("s-rdap","wait","Registration: loading");status("s-dns","wait","Infrastructure: loading");status("s-wb","wait","Wayback: loading");
  const jobs=[
-  api("/api/rdap?domain="+encodeURIComponent(d)).then(x=>{current.rdap=x;renderRDAP(x);status("s-rdap","ok",x.cached?"Registration: OK · cached":"Registration: OK")}).catch(e=>{current.errors.rdap=e.message;$("#rdap").innerHTML=`<span class="bad-text">LOOKUP FAILED: ${esc(e.message)}</span>`;status("s-rdap","fail","Registration: failed")}),
+  api("/api/rdap?domain="+encodeURIComponent(d)).then(x=>{current.rdap=x;renderRDAP(x);status("s-rdap","ok",x.cached?"Registration: OK · cached":"Registration: OK")}).catch(e=>{current.errors.rdap=e.message;$("#rdap").innerHTML=`<div class="signal bad"><div class="big">Registration lookup unavailable</div><div class="muted">${esc(e.message)}</div></div><div class="muted">The app tried multiple RDAP sources. Retry once; if it still fails, use the DomainTools / ICANN pivot below rather than treating this as a domain signal.</div>`;status("s-rdap","fail","Registration: failed")}),
   api("/api/dns?domain="+encodeURIComponent(d)).then(x=>{current.dns=x;renderInfrastructure();status("s-dns","ok",x.cached?"Infrastructure: OK · cached":"Infrastructure: OK")}).catch(e=>{current.errors.dns=e.message;$("#infra").innerHTML=`<span class="bad-text">LOOKUP FAILED: ${esc(e.message)}</span>`;status("s-dns","fail","Infrastructure: failed")}),
   api("/api/maildns?domain="+encodeURIComponent(d)).then(x=>{current.maildns=x;renderInfrastructure()}).catch(()=>{}),
   api("/api/wayback?domain="+encodeURIComponent(d)).then(x=>{current.wb=x;renderWB(x);status("s-wb","ok",x.cached?"Wayback: OK · cached":"Wayback: OK")}).catch(e=>{current.errors.wb=e.message;$("#wb").innerHTML=`<span class="muted">Wayback unavailable: ${esc(e.message)}</span>`;status("s-wb","fail","Wayback: unavailable")})
@@ -240,7 +251,8 @@ function renderWB(x){
 }
 function priorLifecycle(){const r=current?.rdap,w=current?.wb;if(!r?.created||!w?.oldest?.available||!w.oldest.timestamp)return{state:"unknown",gap:null};const gap=diffDays(w.oldest.timestamp,r.created);return gap!==null&&gap>30?{state:"yes",gap}:{state:"no",gap}}
 function renderLifecycle(){
- const r=current.rdap,p=priorLifecycle();let pv=p.state==="yes"?"YES — archived web predates current registration":p.state==="no"?"No evidence from lightweight archive check":"Unknown";
+ const r=current?.rdap,p=priorLifecycle();
+ if(!r){$("#lifecycle").innerHTML='<div class="signal bad"><div class="big">Lifecycle unavailable</div><div class="muted">Registration/RDAP data could not be retrieved, so no lifecycle inference is possible.</div></div>';return;}let pv=p.state==="yes"?"YES — archived web predates current registration":p.state==="no"?"No evidence from lightweight archive check":"Unknown";
  $("#lifecycle").innerHTML=`<div class="lifecycle"><div class="lifeBox"><div class="label">Current registration started</div><div class="value">${esc(fmt(r?.created))}</div></div><div class="lifeBox"><div class="label">Last registrar transfer</div><div class="value">${esc(r?.transfer?fmt(r.transfer):"Not reported")}</div></div><div class="lifeBox"><div class="label">Earlier web-lifecycle evidence</div><div class="value">${esc(pv)}</div></div></div>`;
  if(p.state==="yes")$("#lifecycle").innerHTML+=`<div class="signal warn" style="margin-top:12px"><div class="big">Possible re-registration / repurposing clue</div><div class="muted">Archived web evidence predates current registration by about ${(p.gap/365.25).toFixed(1)} years. Verify with historical WHOIS/passive DNS.</div></div>`;
  $("#lifecycle").innerHTML+=`<div class="kv" style="margin-top:14px">${row("Exact re-registration count","Not determinable from free RDAP")}${row("Inactive gap length","Not determinable without historical registration/DNS data")}${row("Best verification","Historical WHOIS / passive DNS")}</div>`;
@@ -309,4 +321,9 @@ function summaryText(){const r=current?.rdap||{},d=current?.dns||{},m=current?.m
 $("#go").onclick=investigate;$("#domain").onkeydown=e=>{if(e.key==="Enter")investigate()};$("#talosBtn").onclick=()=>openUrl("talos");$("#vtBtn").onclick=()=>openUrl("vt");$("#dtBtn").onclick=()=>openUrl("dt");$("#stBtn").onclick=()=>openUrl("st");$("#wbBtn").onclick=()=>openUrl("wb");$("#ctBtn").onclick=ct;
 $("#save").onclick=()=>{localStorage.setItem(storageKey(),JSON.stringify({disp:$("#disp").value,notes:$("#notes").value}));$("#saved").textContent=" Saved in this browser."};
 $("#copy").onclick=async()=>{if(!current&&!parsedHeader)return alert("Investigate a domain or analyze a header first.");await navigator.clipboard.writeText(summaryText());$("#saved").textContent=" Summary copied."};
+
+const topBtn=$("#topBtn");
+window.addEventListener("scroll",()=>{ if(window.scrollY>600) topBtn.classList.add("show"); else topBtn.classList.remove("show"); });
+topBtn.onclick=()=>window.scrollTo({top:0,behavior:"smooth"});
+
 </script></body></html>

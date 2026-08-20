@@ -1,19 +1,20 @@
-# Domain Backstory v9
+# Domain Backstory v10
 
-Main change: `Current DNS Footprint` is replaced with `Current Infrastructure`.
+## Fixes
+- Registration/RDAP lookup is more fault-tolerant:
+  1. tries rdap.org with retry,
+  2. falls back to the official IANA RDAP bootstrap and authoritative registry endpoint,
+  3. returns a detailed multi-source error instead of a vague failure.
+- Longer RDAP timeout and one retry per source.
+- Lifecycle panel no longer tries to infer anything when registration data is unavailable.
+- Added a floating **↑ Back to top** button in the lower-right corner after scrolling down.
 
-The main view now interprets:
-- Web/host destination from A/CNAME
-- Inbound email gateway from MX
-- Authorized outbound-provider clues from SPF
-- DNS-management provider from NS
-- DMARC when available
+## Deploy
+Replace the existing GitHub repo contents with this package and push.
+Your connected Cloudflare Worker should redeploy automatically.
 
-Raw A/AAAA/MX/NS/CNAME/SOA records are still available under `Show raw DNS records`.
+## Quick registration test
+After deployment:
+`/api/rdap?domain=yahoo.com`
 
-Important interpretation safeguard:
-MX is inbound routing. The app never treats `MX = Sophos` plus `Observed sender = Mailgun` as suspicious by itself.
-
-The email-header analyzer remains browser-only and compares the observed sending provider against current SPF authorization clues, SPF/DKIM/DMARC, From/Return-Path/DKIM domains, and the investigated domain.
-
-Deploy by replacing the existing repo with these files and pushing to GitHub.
+The JSON now also includes a `source` field so you can see whether the result came from `rdap.org` or the IANA/registry fallback.
