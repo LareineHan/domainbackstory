@@ -1,21 +1,20 @@
-# Domain Backstory v11.1 — build fix
+# Domain Backstory v12 — Korean / English
 
-Validated with `node --check` before packaging.
+## UX changes
+- 한국어 / English toggle
+- Korean is the default; choice is saved in browser localStorage
+- New compact summary at the top:
+  - key domain context
+  - recent registration changes
+  - inbound gateway
+  - SPF outbound-provider clues
+  - recommended next investigation step
+- Raw/technical details remain below
+- Existing floating ↑ button and bottom ↑ Back to top button are retained
 
-# Domain Backstory v11
-
-## Registration fallback improvements
-- RDAP 404/not-found is shown as **Registration record not found via RDAP**, not as evidence that the domain is malicious or nonexistent.
-- The registration card immediately offers:
-  - **Check ICANN Lookup**
-  - **Check WHOIS (DomainTools)**
-  - **Retry RDAP**
-- The Lifecycle card also shows ICANN/WHOIS fallback buttons whenever registration data is unavailable.
-- Provider errors and not-found conditions remain conceptually separate.
-
-## Navigation
-- The floating lower-right **↑** button from v10 is retained.
-- A visible **↑ Back to top** button is also added at the very bottom of the page.
+## Validation
+- Frontend inline JavaScript: syntax checked with Node
+- Worker JavaScript: syntax checked with Node
 
 ## Deploy
-Replace the existing repo contents with this package and push. The connected Cloudflare deployment should rebuild automatically.
+Replace the existing GitHub repo contents with this package and push.

@@ -5,7 +5,7 @@ async function fjson(url,ms=12000,headers={},attempts=2){
  for(let i=0;i<attempts;i++){
   const c=new AbortController(),t=setTimeout(()=>c.abort(),ms);
   try{
-   const r=await fetch(url,{headers:{"accept":"application/json,text/plain,*/*","user-agent":"DomainBackstory/10.0",...headers},signal:c.signal});
+   const r=await fetch(url,{headers:{"accept":"application/json,text/plain,*/*","user-agent":"DomainBackstory/12.0",...headers},signal:c.signal});
    if(!r.ok){const e=new Error("Provider HTTP "+r.status);e.status=r.status;throw e}
    return await r.json();
   }catch(e){

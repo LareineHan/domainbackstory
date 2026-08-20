@@ -89,12 +89,24 @@ summary{cursor:pointer;color:#c9baff;font-weight:700}
 }
 #topBtn.show{display:flex}
 
+
+.langtoggle{display:flex;gap:6px;align-items:center;background:var(--panel);border:1px solid var(--line);padding:5px;border-radius:999px;margin-top:10px;width:max-content}
+.langtoggle button{padding:7px 11px;border-radius:999px;background:transparent;color:var(--muted);border:0;font-size:12px}
+.langtoggle button.active{background:var(--accent);color:#120d18}
+.summarybox{background:linear-gradient(180deg,rgba(167,134,255,.08),rgba(167,134,255,.03));border:1px solid rgba(167,134,255,.28);border-radius:14px;padding:15px;margin-bottom:12px}
+.summarybox .headline{font-size:18px;font-weight:850;margin-bottom:6px}
+.nextstep{margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--panel2);border:1px solid var(--line)}
+
 </style>
 </head>
 <body><div class="wrap">
 <div class="hero">
  <div><h1>Domain Backstory</h1><div class="sub">Sender-domain triage plus optional email-header analysis. The main view explains what the infrastructure means; raw DNS stays available underneath.</div></div>
  <div class="badge">RDAP · Infrastructure · Headers · Reputation pivots</div>
+<div class="langtoggle" aria-label="Language">
+ <button id="langKo" class="active">한국어</button>
+ <button id="langEn">English</button>
+</div>
 </div>
 
 <div class="search"><input type="text" id="domain" placeholder="example.com or paste an email / URL"><button id="go">Investigate</button></div>
@@ -107,7 +119,11 @@ summary{cursor:pointer;color:#c9baff;font-weight:700}
 <div class="grid">
  <section class="card">
   <h2>What stands out</h2>
-  <div id="signal" class="muted">Enter a domain to begin.</div>
+  <div id="quickSummary" class="summarybox">
+ <div class="headline" id="qsHeadline">도메인을 입력해 주세요.</div>
+ <div class="muted" id="qsBody">주요 결과와 다음 조사 방향이 여기에 표시됩니다.</div>
+ <div class="nextstep" id="qsNext"><b>다음 조사:</b> 도메인을 먼저 조사하세요.</div>
+</div><div id="signal" class="muted">Enter a domain to begin.</div>
   <div id="flags"></div>
  </section>
 
@@ -168,6 +184,45 @@ summary{cursor:pointer;color:#c9baff;font-weight:700}
 <button id="topBtn" aria-label="Scroll to top" title="Back to top">↑</button>
 
 <script>
+
+const UI_TEXT={
+ ko:{
+  what:"한눈에 보기", reg:"등록 라이프사이클", life:"재등록 / 재사용 가능성", timeline:"등록 타임라인",
+  infra:"현재 인프라", web:"과거 웹 기록", header:"이메일 헤더 분석", deep:"추가 조사 바로가기", notes:"분석 메모",
+  investigate:"조사하기", analyze:"헤더 분석", useFrom:"From 도메인 사용", save:"로컬 저장", copy:"요약 복사",
+  back:"↑ 맨 위로", noDomain:"도메인을 입력해 주세요.", noDomainBody:"주요 결과와 다음 조사 방향이 여기에 표시됩니다.",
+  next:"다음 조사", start:"도메인을 먼저 조사하세요."
+ },
+ en:{
+  what:"What stands out", reg:"Registration lifecycle", life:"Lifecycle / possible re-registration", timeline:"Registration timeline",
+  infra:"Current infrastructure", web:"Historical web evidence", header:"Email header analyzer", deep:"Deep investigation pivots", notes:"Analyst notes",
+  investigate:"Investigate", analyze:"Analyze header", useFrom:"Use From domain", save:"Save locally", copy:"Copy summary",
+  back:"↑ Back to top", noDomain:"Enter a domain to begin.", noDomainBody:"Key findings and the next investigation direction will appear here.",
+  next:"Next step", start:"Investigate a domain first."
+ }
+};
+let LANG=localStorage.getItem("domainBackstoryLang")||"ko";
+function setLang(lang){
+ LANG=lang;localStorage.setItem("domainBackstoryLang",lang);document.documentElement.lang=lang==="ko"?"ko":"en";
+ $("#langKo")?.classList.toggle("active",lang==="ko");$("#langEn")?.classList.toggle("active",lang==="en");
+ const headings=[...document.querySelectorAll("h2")];
+ if(headings[0])headings[0].textContent=UI_TEXT[lang].what;
+ if(headings[1])headings[1].textContent=UI_TEXT[lang].reg;
+ if(headings[2])headings[2].textContent=UI_TEXT[lang].life;
+ if(headings[3])headings[3].textContent=UI_TEXT[lang].timeline;
+ if(headings[4])headings[4].textContent=UI_TEXT[lang].infra;
+ if(headings[5])headings[5].textContent=UI_TEXT[lang].web;
+ if(headings[6])headings[6].textContent=UI_TEXT[lang].header;
+ if(headings[7])headings[7].textContent=UI_TEXT[lang].deep;
+ if(headings[8])headings[8].textContent=UI_TEXT[lang].notes;
+ const setBtn=(id,txt)=>{const el=$(id);if(el)el.textContent=txt};
+ setBtn("#go",UI_TEXT[lang].investigate);setBtn("#parseHeader",UI_TEXT[lang].analyze);setBtn("#useFrom",UI_TEXT[lang].useFrom);
+ setBtn("#save",UI_TEXT[lang].save);setBtn("#copy",UI_TEXT[lang].copy);setBtn("#bottomTopBtn",UI_TEXT[lang].back);
+ if(!current){$("#qsHeadline").textContent=UI_TEXT[lang].noDomain;$("#qsBody").textContent=UI_TEXT[lang].noDomainBody;$("#qsNext").innerHTML="<b>"+UI_TEXT[lang].next+":</b> "+UI_TEXT[lang].start;}
+ else renderQuickSummary();
+}
+function tr(ko,en){return LANG==="ko"?ko:en}
+
 const $=s=>document.querySelector(s); let current=null, parsedHeader=null;
 
 function clean(x){x=(x||"").trim().toLowerCase();if(x.includes("@")&&!x.includes("://"))x=x.split("@").pop();try{if(x.includes("://"))x=new URL(x).hostname}catch{}return x.split("/")[0].split(":")[0].replace(/^\.+|\.+$/g,"")}
@@ -212,6 +267,30 @@ function spfProviders(spf){
  return out;
 }
 
+
+function renderQuickSummary(){
+ if(!current)return;
+ const r=current?.rdap||{},d=current?.dns||{},m=current?.maildns||{};
+ const lines=[];let headline=tr("도메인 컨텍스트 확인됨","Domain context retrieved");
+ let next=tr("평판과 실제 메일 행위를 함께 확인하세요.","Check reputation and actual mail behavior next.");
+ if(r.created){
+  const n=ago(r.created);
+  if(n<90){headline=tr("최근 등록된 도메인","Recently registered domain");lines.push(tr(`현재 등록이 ${n}일 전 시작됨`,`Current registration started ${n} days ago`));next=tr("공격자 등록 인프라 가능성을 우선 확인하세요.","Prioritize attacker-controlled infrastructure as a hypothesis.");}
+  else if(n>1825)lines.push(tr(`현재 등록 약 ${Math.floor(n/365.25)}년`,`Current registration about ${Math.floor(n/365.25)} years`));
+ }
+ if(r.changed&&ago(r.changed)>=0&&ago(r.changed)<30)lines.push(tr(`등록정보 ${ago(r.changed)}일 전 변경`,`Registration record changed ${ago(r.changed)} days ago`));
+ if(r.transfer&&ago(r.transfer)>=0&&ago(r.transfer)<90)lines.push(tr(`Registrar transfer ${ago(r.transfer)}일 전`,`Registrar transfer ${ago(r.transfer)} days ago`));
+ const mx=(d.MX||[]).join(" ");
+ const provider=providerFromHostnames?providerFromHostnames(d.MX||[]):null;
+ if(provider)lines.push(tr(`수신 메일 게이트웨이: ${provider}`,`Inbound mail gateway: ${provider}`));
+ const outs=(typeof spfProviders==="function")?spfProviders(m.spf||""):[];
+ if(outs.length)lines.push(tr(`SPF outbound 단서: ${outs.join(", ")}`,`SPF outbound clues: ${outs.join(", ")}`));
+ if(parsedHeader?.observedProvider)next=tr(`실제 발송 인프라(${parsedHeader.observedProvider})와 SPF/DKIM/DMARC를 비교하세요.`,`Compare the observed sending provider (${parsedHeader.observedProvider}) with SPF/DKIM/DMARC.`);
+ $("#qsHeadline").textContent=headline;
+ $("#qsBody").textContent=lines.length?lines.join(" · "):tr("아직 강한 신호가 없습니다.","No strong signal yet.");
+ $("#qsNext").innerHTML="<b>"+UI_TEXT[LANG].next+":</b> "+esc(next);
+}
+
 async function investigate(){
  const d=clean($("#domain").value);if(!d||!d.includes("."))return alert("Enter a valid domain.");
  $("#domain").value=d;current={domain:d,rdap:null,dns:null,wb:null,maildns:null,errors:{}};
@@ -241,7 +320,7 @@ async function investigate(){
   api("/api/maildns?domain="+encodeURIComponent(d)).then(x=>{current.maildns=x;renderInfrastructure()}).catch(()=>{}),
   api("/api/wayback?domain="+encodeURIComponent(d)).then(x=>{current.wb=x;renderWB(x);status("s-wb","ok",x.cached?"Wayback: OK · cached":"Wayback: OK")}).catch(e=>{current.errors.wb=e.message;$("#wb").innerHTML=`<span class="muted">Wayback unavailable: ${esc(e.message)}</span>`;status("s-wb","fail","Wayback: unavailable")})
  ];
- await Promise.allSettled(jobs);renderSignal();renderLifecycle();renderTimeline();loadSaved();if(parsedHeader)renderHeaderComparison();
+ await Promise.allSettled(jobs);renderQuickSummary();renderSignal();renderLifecycle();renderTimeline();loadSaved();if(parsedHeader)renderHeaderComparison();
 }
 
 function renderRDAP(x){
@@ -352,6 +431,7 @@ $("#copy").onclick=async()=>{if(!current&&!parsedHeader)return alert("Investigat
 const topBtn=$("#topBtn");
 window.addEventListener("scroll",()=>{ if(window.scrollY>600) topBtn.classList.add("show"); else topBtn.classList.remove("show"); });
 topBtn.onclick=()=>window.scrollTo({top:0,behavior:"smooth"});
+$("#langKo").onclick=()=>setLang("ko");$("#langEn").onclick=()=>setLang("en");setLang(LANG);
 $("#bottomTopBtn").onclick=()=>window.scrollTo({top:0,behavior:"smooth"});
 
 </script></body></html>
