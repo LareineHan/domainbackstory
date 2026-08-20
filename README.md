@@ -1,22 +1,45 @@
-# Domain Backstory v2
+# Domain Backstory v3 — Cloudflare Worker + Static Assets
 
-Updated browser version with:
-- RDAP Created / Updated / Expires / Registrar / IANA ID / Nameservers / Status
-- Color-coded fields that deserve attention
-- Analyst-oriented explanations
-- Combined timeline across RDAP, Certificate Transparency, and Wayback
-- Local analyst notes
+This version fixes the 404 API problem from the earlier Pages Functions layout.
 
-## Update your existing deployment
+## Why v2 returned 404
+Your Cloudflare project was deployed as a **Worker** (`workers.dev`), but v2 used a **Pages Functions** folder layout (`functions/api/...`). The HTML asset deployed, but `/api/rdap`, `/api/ct`, and `/api/wayback` did not exist.
 
-Because your Cloudflare project is already connected to GitHub, the easiest update is:
+## v3 structure
+- `public/index.html` — website
+- `src/index.js` — actual Cloudflare Worker API routes
+- `wrangler.jsonc` — tells Cloudflare to run the Worker for `/api/*`
+- `package.json` — Wrangler dependency/scripts
 
-1. Replace the files in your existing GitHub `domain-backstory` repo with the contents of this ZIP.
-2. Commit/push the changes.
-3. Cloudflare should automatically start a new deployment.
-4. When deployment is complete, refresh your existing `workers.dev` URL.
+Cloudflare officially supports Worker + static assets using an `assets` binding and `run_worker_first` for selected routes.
 
-No new Cloudflare project is needed.
+## Update existing GitHub repo
+Replace the existing repo contents with the contents of this ZIP and commit/push.
 
-## Important
-This remains a passive context tool. Recent registration changes or certificate activity are clues, not proof of compromise.
+Your repo root should look exactly like:
+
+```
+domain-backstory/
+├── package.json
+├── wrangler.jsonc
+├── public/
+│   └── index.html
+└── src/
+    └── index.js
+```
+
+Remove the old `functions/` folder.
+
+## Cloudflare build settings
+If your existing Git-connected Worker redeploys automatically, let it run first.
+
+If Cloudflare asks for commands:
+- Build command: `npm install`
+- Deploy command: `npx wrangler deploy`
+
+After deployment, test:
+`https://YOUR-WORKER.workers.dev/api/rdap?domain=yahoo.com`
+
+You should see JSON rather than 404.
+
+The UI now explicitly shows `RDAP: failed`, `CT: failed`, etc. It will never turn lookup failure into “no strong clue.”
