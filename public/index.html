@@ -162,6 +162,8 @@ summary{cursor:pointer;color:#c9baff;font-weight:700}
   </div>
   <div class="actions"><button id="save">Save locally</button><button class="secondary" id="copy">Copy summary</button></div><span id="saved" class="muted"></span>
  </section>
+</div><div class="actions" style="justify-content:center;margin-top:26px">
+<button class="secondary" id="bottomTopBtn" aria-label="Back to top">↑ Back to top</button>
 </div></div>
 <button id="topBtn" aria-label="Scroll to top" title="Back to top">↑</button>
 
@@ -216,7 +218,25 @@ async function investigate(){
  ["rdap","infra","wb","timeline","lifecycle"].forEach(id=>$("#"+id).textContent="Looking up…");$("#signal").textContent="Building context…";$("#flags").innerHTML="";$("#ctResult").textContent="";
  status("s-rdap","wait","Registration: loading");status("s-dns","wait","Infrastructure: loading");status("s-wb","wait","Wayback: loading");
  const jobs=[
-  api("/api/rdap?domain="+encodeURIComponent(d)).then(x=>{current.rdap=x;renderRDAP(x);status("s-rdap","ok",x.cached?"Registration: OK · cached":"Registration: OK")}).catch(e=>{current.errors.rdap=e.message;$("#rdap").innerHTML=`<div class="signal bad"><div class="big">Registration lookup unavailable</div><div class="muted">${esc(e.message)}</div></div><div class="muted">The app tried multiple RDAP sources. Retry once; if it still fails, use the DomainTools / ICANN pivot below rather than treating this as a domain signal.</div>`;status("s-rdap","fail","Registration: failed")}),
+  api("/api/rdap?domain="+encodeURIComponent(d)).then(x=>{current.rdap=x;renderRDAP(x);status("s-rdap","ok",x.cached?"Registration: OK · cached":"Registration: OK")}).catch(e=>{
+ current.errors.rdap=e.message;
+ const notFound=/404|not found/i.test(e.message||"");
+ const title=notFound?"Registration record not found via RDAP":"Registration lookup unavailable";
+ const detail=notFound
+   ?"RDAP did not return a registration object. This does not mean the hostname or website is nonexistent or benign."
+   :"The RDAP providers did not return usable registration data. Treat registration context as unavailable, not as a threat signal.";
+ const d=current?.domain||clean($("#domain").value);
+ const icann="https://lookup.icann.org/en/lookup?name="+encodeURIComponent(d);
+ const dt="https://whois.domaintools.com/"+encodeURIComponent(d);
+ $("#rdap").innerHTML=`<div class="signal ${notFound?"info":"bad"}"><div class="big">${esc(title)}</div><div class="muted">${esc(detail)}</div></div>
+ <div class="actions">
+  <button class="secondary" onclick="window.open('${icann}','_blank','noopener')">Check ICANN Lookup</button>
+  <button class="ghost" onclick="window.open('${dt}','_blank','noopener')">Check WHOIS</button>
+  <button class="ghost" onclick="investigate()">Retry RDAP</button>
+ </div>
+ <div class="callout muted">Manual WHOIS/registry results may still be limited or redacted, but they are the best next check when automated RDAP does not return a record.</div>`;
+ status("s-rdap",notFound?"wait":"fail",notFound?"Registration: RDAP record not found":"Registration: unavailable");
+}),
   api("/api/dns?domain="+encodeURIComponent(d)).then(x=>{current.dns=x;renderInfrastructure();status("s-dns","ok",x.cached?"Infrastructure: OK · cached":"Infrastructure: OK")}).catch(e=>{current.errors.dns=e.message;$("#infra").innerHTML=`<span class="bad-text">LOOKUP FAILED: ${esc(e.message)}</span>`;status("s-dns","fail","Infrastructure: failed")}),
   api("/api/maildns?domain="+encodeURIComponent(d)).then(x=>{current.maildns=x;renderInfrastructure()}).catch(()=>{}),
   api("/api/wayback?domain="+encodeURIComponent(d)).then(x=>{current.wb=x;renderWB(x);status("s-wb","ok",x.cached?"Wayback: OK · cached":"Wayback: OK")}).catch(e=>{current.errors.wb=e.message;$("#wb").innerHTML=`<span class="muted">Wayback unavailable: ${esc(e.message)}</span>`;status("s-wb","fail","Wayback: unavailable")})
@@ -252,7 +272,14 @@ function renderWB(x){
 function priorLifecycle(){const r=current?.rdap,w=current?.wb;if(!r?.created||!w?.oldest?.available||!w.oldest.timestamp)return{state:"unknown",gap:null};const gap=diffDays(w.oldest.timestamp,r.created);return gap!==null&&gap>30?{state:"yes",gap}:{state:"no",gap}}
 function renderLifecycle(){
  const r=current?.rdap,p=priorLifecycle();
- if(!r){$("#lifecycle").innerHTML='<div class="signal bad"><div class="big">Lifecycle unavailable</div><div class="muted">Registration/RDAP data could not be retrieved, so no lifecycle inference is possible.</div></div>';return;}let pv=p.state==="yes"?"YES — archived web predates current registration":p.state==="no"?"No evidence from lightweight archive check":"Unknown";
+ if(!r){
+ const d=current?.domain||clean($("#domain").value);
+ const icann="https://lookup.icann.org/en/lookup?name="+encodeURIComponent(d);
+ const dt="https://whois.domaintools.com/"+encodeURIComponent(d);
+ $("#lifecycle").innerHTML=`<div class="signal info"><div class="big">Lifecycle unavailable from RDAP</div><div class="muted">No lifecycle inference is made without registration data. DNS, header, reputation, and sandbox evidence can still be evaluated independently.</div></div>
+ <div class="actions"><button class="secondary" onclick="window.open('${icann}','_blank','noopener')">Check ICANN Lookup</button><button class="ghost" onclick="window.open('${dt}','_blank','noopener')">Check WHOIS</button></div>`;
+ return;
+}let pv=p.state==="yes"?"YES — archived web predates current registration":p.state==="no"?"No evidence from lightweight archive check":"Unknown";
  $("#lifecycle").innerHTML=`<div class="lifecycle"><div class="lifeBox"><div class="label">Current registration started</div><div class="value">${esc(fmt(r?.created))}</div></div><div class="lifeBox"><div class="label">Last registrar transfer</div><div class="value">${esc(r?.transfer?fmt(r.transfer):"Not reported")}</div></div><div class="lifeBox"><div class="label">Earlier web-lifecycle evidence</div><div class="value">${esc(pv)}</div></div></div>`;
  if(p.state==="yes")$("#lifecycle").innerHTML+=`<div class="signal warn" style="margin-top:12px"><div class="big">Possible re-registration / repurposing clue</div><div class="muted">Archived web evidence predates current registration by about ${(p.gap/365.25).toFixed(1)} years. Verify with historical WHOIS/passive DNS.</div></div>`;
  $("#lifecycle").innerHTML+=`<div class="kv" style="margin-top:14px">${row("Exact re-registration count","Not determinable from free RDAP")}${row("Inactive gap length","Not determinable without historical registration/DNS data")}${row("Best verification","Historical WHOIS / passive DNS")}</div>`;
@@ -325,5 +352,6 @@ $("#copy").onclick=async()=>{if(!current&&!parsedHeader)return alert("Investigat
 const topBtn=$("#topBtn");
 window.addEventListener("scroll",()=>{ if(window.scrollY>600) topBtn.classList.add("show"); else topBtn.classList.remove("show"); });
 topBtn.onclick=()=>window.scrollTo({top:0,behavior:"smooth"});
+$("#bottomTopBtn").onclick=()=>window.scrollTo({top:0,behavior:"smooth"});
 
 </script></body></html>

@@ -1,20 +1,17 @@
-# Domain Backstory v10
+# Domain Backstory v11
 
-## Fixes
-- Registration/RDAP lookup is more fault-tolerant:
-  1. tries rdap.org with retry,
-  2. falls back to the official IANA RDAP bootstrap and authoritative registry endpoint,
-  3. returns a detailed multi-source error instead of a vague failure.
-- Longer RDAP timeout and one retry per source.
-- Lifecycle panel no longer tries to infer anything when registration data is unavailable.
-- Added a floating **↑ Back to top** button in the lower-right corner after scrolling down.
+## Registration fallback improvements
+- RDAP 404/not-found is shown as **Registration record not found via RDAP**, not as evidence that the domain is malicious or nonexistent.
+- The registration card immediately offers:
+  - **Check ICANN Lookup**
+  - **Check WHOIS (DomainTools)**
+  - **Retry RDAP**
+- The Lifecycle card also shows ICANN/WHOIS fallback buttons whenever registration data is unavailable.
+- Provider errors and not-found conditions remain conceptually separate.
+
+## Navigation
+- The floating lower-right **↑** button from v10 is retained.
+- A visible **↑ Back to top** button is also added at the very bottom of the page.
 
 ## Deploy
-Replace the existing GitHub repo contents with this package and push.
-Your connected Cloudflare Worker should redeploy automatically.
-
-## Quick registration test
-After deployment:
-`/api/rdap?domain=yahoo.com`
-
-The JSON now also includes a `source` field so you can see whether the result came from `rdap.org` or the IANA/registry fallback.
+Replace the existing repo contents with this package and push. The connected Cloudflare deployment should rebuild automatically.
