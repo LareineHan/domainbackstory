@@ -1,18 +1,32 @@
-# Domain Backstory v7
+# Domain Backstory v8
 
-Focus: lifecycle and possible re-registration clues without inventing historical registration data.
+## Major addition: browser-only email header analyzer
+Paste a raw Internet header or upload a `.txt`/`.eml` file. The raw header is parsed in frontend JavaScript and is **not sent to the Cloudflare Worker**.
 
-## What v7 adds
-- RDAP `transfer` event: last sponsoring-registrar transfer when the registry provides it.
-- Clear distinction between **current registration creation date** and first-ever domain existence.
-- Lightweight Wayback lookup returns an older and a recent archived copy.
-- If an archived web copy predates the current RDAP creation date, the app flags **evidence of an earlier web lifecycle**.
-- This can support a re-registration/repurposing hypothesis, but does not prove malicious intent or enumerate every registration cycle.
-- Exact re-registration count and inactive-gap duration are explicitly marked as unavailable without historical WHOIS/passive DNS.
-- DomainTools and SecurityTrails remain the deep pivots for that verification.
+The analyzer extracts:
+- From domain
+- Return-Path / smtp.mailfrom domain
+- DKIM signing domain from Authentication-Results
+- SPF / DKIM / DMARC results
+- public IPs observed in Received headers
+- Received hop count
+- common sending-provider clues (Mailgun, SendGrid, Mandrill, SES, Microsoft 365, Google, Proofpoint, Sophos, Mimecast)
 
-## Why the app does not claim "re-registered 3 times"
-Free current RDAP normally exposes the current lifecycle, not a complete history of deleted and re-created domain objects. Guessing the count from sparse archive data would create false confidence.
+It then compares those with:
+- current SPF record
+- current DMARC record
+- the investigated domain
+- provider clues
+
+## Important interpretation safeguards
+- MX is explicitly labeled as **inbound routing**, not an outbound baseline.
+- A different outbound provider from the MX is not flagged as suspicious by itself.
+- Authentication PASS does not prove the mailbox/SaaS account was uncompromised.
+- If malicious content passes SPF/DKIM/DMARC through expected infrastructure, the app suggests authorized-infrastructure abuse / account compromise as a **hypothesis**, not confirmation.
+- Current SPF can differ from the SPF record at the time the message was sent.
+
+## Privacy
+The raw header never leaves the browser in v8. However, users should still follow their organization's rules before pasting production email headers into any tool, even an internal/browser-only one.
 
 ## Deploy
-Replace your existing repo contents with this package and push. Your existing Cloudflare Worker should redeploy automatically.
+Replace the existing repo contents with this package and push. Cloudflare should redeploy automatically.
