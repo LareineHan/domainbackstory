@@ -1,25 +1,22 @@
-# Domain Backstory — browser version
+# Domain Backstory v2
 
-No Python is needed on the school computer.
+Updated browser version with:
+- RDAP Created / Updated / Expires / Registrar / IANA ID / Nameservers / Status
+- Color-coded fields that deserve attention
+- Analyst-oriented explanations
+- Combined timeline across RDAP, Certificate Transparency, and Wayback
+- Local analyst notes
 
-## Deploy with Cloudflare Pages
-1. Create a GitHub repository, e.g. `domain-backstory`.
-2. Upload **all files/folders from this ZIP** to the repository root.
-3. In Cloudflare: **Workers & Pages → Create → Pages → Connect to Git**.
-4. Select the repo.
-5. Framework preset: **None**
-6. Build command: leave blank
-7. Build output directory: `.`
-8. Deploy.
+## Update your existing deployment
 
-Open the generated `https://...pages.dev` URL in any browser.
+Because your Cloudflare project is already connected to GitHub, the easiest update is:
 
-## What it uses
-- RDAP
-- Certificate Transparency (`crt.sh`)
-- Wayback/CDX
-- Browser localStorage for your own notes
+1. Replace the files in your existing GitHub `domain-backstory` repo with the contents of this ZIP.
+2. Commit/push the changes.
+3. Cloudflare should automatically start a new deployment.
+4. When deployment is complete, refresh your existing `workers.dev` URL.
+
+No new Cloudflare project is needed.
 
 ## Important
-This is a passive context tool, not a compromise detector. Public metadata can be ambiguous.
-Do not paste confidential email headers, credentials, tokens, or internal-only data into it.
+This remains a passive context tool. Recent registration changes or certificate activity are clues, not proof of compromise.
