@@ -1,23 +1,22 @@
-# Domain Backstory v3 — Cloudflare Worker + Static Assets
+# Domain Backstory v4
 
-This version fixes the 404 API problem from the earlier Pages Functions layout.
+Optimized for fast, practical use during phishing/sender-domain investigation.
 
-## Why v2 returned 404
-Your Cloudflare project was deployed as a **Worker** (`workers.dev`), but v2 used a **Pages Functions** folder layout (`functions/api/...`). The HTML asset deployed, but `/api/rdap`, `/api/ct`, and `/api/wayback` did not exist.
+## What changed
+- RDAP remains the reliable primary source.
+- Certificate Transparency now uses a lightweight exact-domain lookup by default.
+- A **Deep CT lookup** button runs wildcard/subdomain enumeration only when you actually need it.
+- Wayback now uses the lightweight **Wayback Availability API** instead of the heavy CDX history query that was returning HTTP 429.
+- A manual **Open full Wayback history** button opens Internet Archive in a new tab when deeper browsing is worth the time.
+- Worker cache reduces repeat traffic to RDAP/crt.sh/Wayback.
+- Source status is explicit: failed lookups are never interpreted as “no suspicious context.”
+- Added an analyst-oriented signal, colored clues, timeline, local notes, and “Copy analyst summary.”
 
-## v3 structure
-- `public/index.html` — website
-- `src/index.js` — actual Cloudflare Worker API routes
-- `wrangler.jsonc` — tells Cloudflare to run the Worker for `/api/*`
-- `package.json` — Wrangler dependency/scripts
+## Update existing deployment
+Replace the contents of your existing GitHub repo with this ZIP, commit, and push.
+Your existing Cloudflare Git-connected Worker should redeploy automatically.
 
-Cloudflare officially supports Worker + static assets using an `assets` binding and `run_worker_first` for selected routes.
-
-## Update existing GitHub repo
-Replace the existing repo contents with the contents of this ZIP and commit/push.
-
-Your repo root should look exactly like:
-
+Expected repo structure:
 ```
 domain-backstory/
 ├── package.json
@@ -28,18 +27,12 @@ domain-backstory/
     └── index.js
 ```
 
-Remove the old `functions/` folder.
+## Quick tests after deployment
+- `/api/rdap?domain=yahoo.com`
+- `/api/ct?mode=quick&domain=yahoo.com`
+- `/api/wayback?mode=quick&domain=yahoo.com`
 
-## Cloudflare build settings
-If your existing Git-connected Worker redeploys automatically, let it run first.
+RDAP should return JSON. CT/Wayback may still occasionally be unavailable because they are public services, but the app now keeps those lookups much lighter and caches successful results.
 
-If Cloudflare asks for commands:
-- Build command: `npm install`
-- Deploy command: `npx wrangler deploy`
-
-After deployment, test:
-`https://YOUR-WORKER.workers.dev/api/rdap?domain=yahoo.com`
-
-You should see JSON rather than 404.
-
-The UI now explicitly shows `RDAP: failed`, `CT: failed`, etc. It will never turn lookup failure into “no strong clue.”
+## Interpretation
+This app supports analyst hypotheses; it does not confirm compromise from public metadata alone.
