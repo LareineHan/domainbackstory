@@ -1,437 +1,460 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Domain Backstory</title>
 <style>
 :root{
- --bg:#0c0c12;--panel:#171720;--panel2:#20202b;--line:#353246;
- --text:#f5f2ff;--muted:#aaa5ba;--accent:#a786ff;
- --good:#7fdfb0;--warn:#ffd37a;--bad:#ff8a9a;--info:#86c7ff;
+  --bg:#0b0b10; --surface:#14141b; --surface2:#1b1b24; --surface3:#20202b;
+  --border:#2d2b38; --text:#f5f3ff; --muted:#a9a5b8;
+  --accent:#a786ff; --accent2:#7b61d9;
+  --good:#7dd9ad; --warn:#f1c96b; --bad:#ef8291; --info:#7fbbef;
+  --shadow:0 10px 30px rgba(0,0,0,.22);
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-.wrap{max-width:1220px;margin:auto;padding:28px 18px 70px}
-.hero{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}
-h1{margin:0 0 8px;font-size:38px;letter-spacing:-.035em}
-.sub{color:var(--muted);line-height:1.5;max-width:900px}
-.badge{border:1px solid var(--line);background:var(--panel);padding:8px 11px;border-radius:999px;color:var(--muted);font-size:12px}
-.search{display:flex;gap:10px;margin:22px 0 14px;background:var(--panel);border:1px solid var(--line);padding:14px;border-radius:16px;position:sticky;top:8px;z-index:3}
-input,select,textarea,button{font:inherit}
-input[type=text]{flex:1;background:#101018;color:var(--text);border:1px solid var(--line);border-radius:11px;padding:13px}
-button{background:var(--accent);border:0;border-radius:11px;padding:12px 16px;font-weight:800;cursor:pointer}
-button.secondary{background:#242033;color:var(--text);border:1px solid var(--line)}
-button.ghost{background:transparent;color:#c9baff;border:1px solid var(--line)}
-.grid{display:grid;grid-template-columns:1.05fr .95fr;gap:16px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
-.full{grid-column:1/-1}
-h2{font-size:14px;letter-spacing:.09em;text-transform:uppercase;color:#d8d2ef;margin:0 0 14px}
-.muted{color:var(--muted);font-size:13px;line-height:1.48}
-.statusrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.status{padding:6px 9px;border-radius:999px;font-size:12px;border:1px solid var(--line)}
-.status.ok{color:var(--good);border-color:rgba(127,223,176,.3)}
-.status.fail{color:var(--bad);border-color:rgba(255,138,154,.3)}
-.status.wait{color:var(--muted)}
-.kv{display:grid;grid-template-columns:190px 1fr;gap:9px 12px;font-size:14px}
-.k{color:var(--muted)}.v{overflow-wrap:anywhere}
-.hl{padding:5px 8px;border-radius:8px;display:inline-block}
-.hl.good{background:rgba(127,223,176,.11);color:var(--good);border:1px solid rgba(127,223,176,.25)}
-.hl.warn{background:rgba(255,211,122,.11);color:var(--warn);border:1px solid rgba(255,211,122,.25)}
-.hl.bad{background:rgba(255,138,154,.11);color:var(--bad);border:1px solid rgba(255,138,154,.25)}
-.hl.info{background:rgba(134,199,255,.11);color:var(--info);border:1px solid rgba(134,199,255,.25)}
-.signal{padding:15px;border-radius:14px;border:1px solid var(--line);margin-bottom:12px}
-.signal.good{background:rgba(127,223,176,.07);border-color:rgba(127,223,176,.28)}
-.signal.warn{background:rgba(255,211,122,.07);border-color:rgba(255,211,122,.28)}
-.signal.bad{background:rgba(255,138,154,.07);border-color:rgba(255,138,154,.28)}
-.signal.info{background:rgba(134,199,255,.07);border-color:rgba(134,199,255,.28)}
-.signal .big{font-size:19px;font-weight:850;margin-bottom:6px}
-.flag{padding:11px 0;border-bottom:1px solid var(--line)}.flag:last-child{border-bottom:0}
-.flag-title{font-weight:800;margin-bottom:3px}.good-text{color:var(--good)}.warn-text{color:var(--warn)}.bad-text{color:var(--bad)}.info-text{color:var(--info)}
-.timeline{display:flex;gap:10px;overflow-x:auto;padding:4px 0}
-.event{min-width:190px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}
-.event .date{font-size:12px;color:var(--muted);margin-bottom:6px}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.deepRow{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
-.deepRow:last-child{border-bottom:0}.deepRow .why{max-width:720px}
-.notes{display:grid;grid-template-columns:250px 1fr;gap:12px}
-textarea,select{width:100%;background:#101018;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px}
-textarea{min-height:105px}
-.callout{border-left:3px solid var(--info);padding-left:10px;margin-top:12px}
-.lifecycle{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.lifeBox{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:13px}
-.lifeBox .label{color:var(--muted);font-size:12px;margin-bottom:6px}.lifeBox .value{font-weight:850;font-size:16px}
-.headerbox{background:#101018;border:1px solid var(--line);border-radius:12px;padding:12px}
-#headerText{min-height:180px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
-.fileRow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
-.comparegrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.comparebox{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}
-.comparebox .label{color:var(--muted);font-size:12px;margin-bottom:5px}.comparebox .value{font-weight:750;overflow-wrap:anywhere}
-.infra{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.infrabox{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:13px}
-.infrabox .label{font-size:12px;color:var(--muted);margin-bottom:6px}
-.infrabox .value{font-weight:800;line-height:1.4;overflow-wrap:anywhere}
-.infrabox .meaning{font-size:12px;color:var(--muted);margin-top:7px;line-height:1.45}
-details{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
-summary{cursor:pointer;color:#c9baff;font-weight:700}
-.rawdns{margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.rawbox{background:#111119;border:1px solid var(--line);border-radius:10px;padding:10px}
-.rawbox b{display:block;margin-bottom:5px}
-.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;overflow-wrap:anywhere;color:#ddd8ef}
-@media(max-width:900px){.lifecycle,.comparegrid,.infra{grid-template-columns:1fr 1fr}}
-@media(max-width:780px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.comparegrid,.infra,.rawdns{grid-template-columns:1fr}.notes{grid-template-columns:1fr}.hero{display:block}.badge{display:inline-block;margin-top:10px}.search{flex-wrap:wrap}.search input{min-width:100%}.lifecycle{grid-template-columns:1fr}}
-
-#topBtn{
- position:fixed;right:22px;bottom:22px;z-index:20;
- width:48px;height:48px;border-radius:999px;padding:0;
- display:none;align-items:center;justify-content:center;
- background:var(--accent);color:#120d18;font-size:21px;font-weight:900;
- box-shadow:0 10px 28px rgba(0,0,0,.35);border:0;
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:
+  radial-gradient(circle at 12% -10%, rgba(167,134,255,.12), transparent 28%),
+  radial-gradient(circle at 95% 8%, rgba(127,187,239,.08), transparent 22%),
+  var(--bg);
+  color:var(--text);
+  font-family:Inter,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,-apple-system,sans-serif;
+  word-break:keep-all; overflow-wrap:break-word;
 }
-#topBtn.show{display:flex}
-
-
-.langtoggle{display:flex;gap:6px;align-items:center;background:var(--panel);border:1px solid var(--line);padding:5px;border-radius:999px;margin-top:10px;width:max-content}
-.langtoggle button{padding:7px 11px;border-radius:999px;background:transparent;color:var(--muted);border:0;font-size:12px}
-.langtoggle button.active{background:var(--accent);color:#120d18}
-.summarybox{background:linear-gradient(180deg,rgba(167,134,255,.08),rgba(167,134,255,.03));border:1px solid rgba(167,134,255,.28);border-radius:14px;padding:15px;margin-bottom:12px}
-.summarybox .headline{font-size:18px;font-weight:850;margin-bottom:6px}
-.nextstep{margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--panel2);border:1px solid var(--line)}
-
+button,input,textarea,select{font:inherit}
+button{white-space:nowrap}
+a{color:#c8b8ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.shell{max-width:1180px;margin:0 auto;padding:26px 18px 72px}
+.topbar{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:18px}
+.brand h1{margin:0;font-size:32px;letter-spacing:-.035em}
+.brand p{margin:6px 0 0;color:var(--muted);font-size:14px;line-height:1.55;max-width:770px}
+.langswitch{display:flex;gap:4px;padding:4px;background:var(--surface);border:1px solid var(--border);border-radius:999px;flex:0 0 auto}
+.langswitch button{border:0;background:transparent;color:var(--muted);padding:8px 13px;border-radius:999px;cursor:pointer;font-size:13px;white-space:nowrap}
+.langswitch button.active{background:var(--accent);color:#120e1d;font-weight:800}
+.searchbar{
+  position:sticky;top:10px;z-index:20;
+  display:flex;gap:10px;padding:10px;background:rgba(20,20,27,.92);
+  border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);
+  backdrop-filter:blur(14px);margin-bottom:12px
+}
+.searchbar input{flex:1;min-width:0;border:1px solid var(--border);background:#0f0f15;color:var(--text);padding:13px 14px;border-radius:11px;outline:none}
+.searchbar input:focus{border-color:var(--accent)}
+.btn{border:0;border-radius:11px;padding:12px 15px;font-weight:800;cursor:pointer}
+.btn.primary{background:var(--accent);color:#120e1d}
+.btn.secondary{background:var(--surface3);color:var(--text);border:1px solid var(--border)}
+.btn.ghost{background:transparent;color:#d4c8ff;border:1px solid var(--border)}
+.statusline{display:flex;gap:7px;flex-wrap:wrap;margin:10px 2px 16px}
+.status{font-size:12px;padding:5px 9px;border-radius:999px;border:1px solid var(--border);color:var(--muted)}
+.status.ok{color:var(--good);border-color:rgba(125,217,173,.28)}
+.status.fail{color:var(--bad);border-color:rgba(239,130,145,.28)}
+.status.wait{color:var(--muted)}
+.heroSummary{
+  background:linear-gradient(145deg,rgba(167,134,255,.11),rgba(127,187,239,.05));
+  border:1px solid rgba(167,134,255,.26);border-radius:18px;padding:18px;margin-bottom:16px
+}
+.heroSummary .eyebrow{font-size:12px;color:#cbbdff;text-transform:uppercase;letter-spacing:.08em;font-weight:800}
+.heroSummary h2{margin:7px 0 8px;font-size:22px;letter-spacing:-.025em}
+.heroSummary p{margin:0;color:var(--muted);line-height:1.6}
+.next{margin-top:13px;padding:12px 14px;background:rgba(11,11,16,.45);border:1px solid var(--border);border-radius:12px;font-size:14px}
+.layout{display:grid;grid-template-columns:1.05fr .95fr;gap:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:0 1px 0 rgba(255,255,255,.01)}
+.card.full{grid-column:1/-1}
+.cardhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.cardhead h3{margin:0;font-size:15px;letter-spacing:-.01em}
+.cardhead .hint{font-size:11px;color:var(--muted)}
+.notice{padding:12px 13px;border:1px solid var(--border);border-radius:12px;background:var(--surface2);margin-bottom:10px}
+.notice.good{border-color:rgba(125,217,173,.25);background:rgba(125,217,173,.06)}
+.notice.warn{border-color:rgba(241,201,107,.25);background:rgba(241,201,107,.06)}
+.notice.bad{border-color:rgba(239,130,145,.25);background:rgba(239,130,145,.06)}
+.notice.info{border-color:rgba(127,187,239,.25);background:rgba(127,187,239,.06)}
+.notice b{display:block;margin-bottom:4px}
+.notice p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
+.kv{display:grid;grid-template-columns:170px minmax(0,1fr);gap:8px 12px;font-size:13px}
+.k{color:var(--muted)}
+.v{min-width:0}
+.tag{display:inline-block;padding:4px 7px;border-radius:8px;border:1px solid var(--border)}
+.tag.good{color:var(--good);background:rgba(125,217,173,.07)}
+.tag.warn{color:var(--warn);background:rgba(241,201,107,.07)}
+.tag.bad{color:var(--bad);background:rgba(239,130,145,.07)}
+.tag.info{color:var(--info);background:rgba(127,187,239,.07)}
+.infragrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.infra{background:var(--surface2);border:1px solid var(--border);border-radius:13px;padding:13px}
+.infra .label{font-size:11px;color:var(--muted);margin-bottom:6px}
+.infra .value{font-size:15px;font-weight:800;line-height:1.45}
+.infra .meaning{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
+.timeline{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px}
+.event{min-width:180px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:11px}
+.event .date{font-size:11px;color:var(--muted);margin-bottom:5px}
+.event b{font-size:13px}
+details{margin-top:10px;border-top:1px solid var(--border);padding-top:9px}
+summary{cursor:pointer;color:#cdbfff;font-weight:700;font-size:13px}
+.rawgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
+.rawbox{background:#101017;border:1px solid var(--border);border-radius:10px;padding:9px}
+.rawbox b{font-size:12px}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;color:#ddd8ef;margin-top:4px}
+.filebar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:9px}
+#headerText{min-height:160px;width:100%;resize:vertical;background:#101017;color:var(--text);border:1px solid var(--border);border-radius:11px;padding:11px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px}
+.comparegrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.compare{background:var(--surface2);border:1px solid var(--border);border-radius:11px;padding:10px}
+.compare .label{font-size:11px;color:var(--muted);margin-bottom:5px}
+.compare .value{font-weight:700;font-size:13px}
+.pivot{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:11px 0;border-bottom:1px solid var(--border)}
+.pivot:last-child{border-bottom:0}
+.pivot b{font-size:13px}
+.pivot p{margin:3px 0 0;color:var(--muted);font-size:12px;line-height:1.45}
+.actions{display:flex;gap:7px;flex-wrap:wrap}
+select,textarea{width:100%;background:#101017;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px}
+.notesgrid{display:grid;grid-template-columns:250px 1fr;gap:10px}
+.footerTop{text-align:center;margin-top:22px}
+#floatTop{
+ position:fixed;right:22px;bottom:22px;z-index:30;width:46px;height:46px;border-radius:999px;
+ border:0;background:var(--accent);color:#140f20;font-size:20px;font-weight:900;cursor:pointer;display:none;box-shadow:var(--shadow)
+}
+#floatTop.show{display:block}
+@media(max-width:820px){
+ .topbar{align-items:flex-start}.layout{grid-template-columns:1fr}.card.full{grid-column:auto}
+ .infragrid,.comparegrid,.rawgrid{grid-template-columns:1fr}
+ .notesgrid{grid-template-columns:1fr}
+}
+@media(max-width:620px){
+ .shell{padding:18px 12px 60px}.topbar{display:block}.langswitch{margin-top:12px}
+ .searchbar{flex-wrap:wrap}.searchbar input{min-width:100%}
+ .kv{grid-template-columns:1fr}.k{font-size:11px;margin-top:5px}
+ .pivot{align-items:flex-start;flex-direction:column}
+}
 </style>
 </head>
-<body><div class="wrap">
-<div class="hero">
- <div><h1>Domain Backstory</h1><div class="sub">Sender-domain triage plus optional email-header analysis. The main view explains what the infrastructure means; raw DNS stays available underneath.</div></div>
- <div class="badge">RDAP · Infrastructure · Headers · Reputation pivots</div>
-<div class="langtoggle" aria-label="Language">
- <button id="langKo" class="active">한국어</button>
- <button id="langEn">English</button>
-</div>
-</div>
+<body>
+<div class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <h1>Domain Backstory</h1>
+      <p id="subtitle"></p>
+    </div>
+    <div class="langswitch">
+      <button id="langKo">한국어</button>
+      <button id="langEn">English</button>
+    </div>
+  </header>
 
-<div class="search"><input type="text" id="domain" placeholder="example.com or paste an email / URL"><button id="go">Investigate</button></div>
-<div class="statusrow">
- <span id="s-rdap" class="status wait">Registration: waiting</span>
- <span id="s-dns" class="status wait">Infrastructure: waiting</span>
- <span id="s-wb" class="status wait">Wayback: waiting</span>
-</div>
-
-<div class="grid">
- <section class="card">
-  <h2>What stands out</h2>
-  <div id="quickSummary" class="summarybox">
- <div class="headline" id="qsHeadline">도메인을 입력해 주세요.</div>
- <div class="muted" id="qsBody">주요 결과와 다음 조사 방향이 여기에 표시됩니다.</div>
- <div class="nextstep" id="qsNext"><b>다음 조사:</b> 도메인을 먼저 조사하세요.</div>
-</div><div id="signal" class="muted">Enter a domain to begin.</div>
-  <div id="flags"></div>
- </section>
-
- <section class="card">
-  <h2>Registration lifecycle</h2>
-  <div id="rdap" class="muted">Waiting…</div>
- </section>
-
- <section class="card full">
-  <h2>Lifecycle / possible re-registration</h2>
-  <div id="lifecycle" class="muted">Waiting…</div>
- </section>
-
- <section class="card full">
-  <h2>Registration timeline</h2>
-  <div id="timeline" class="muted">Waiting…</div>
- </section>
-
- <section class="card">
-  <h2>Current infrastructure</h2>
-  <div id="infra" class="muted">Waiting…</div>
- </section>
-
- <section class="card">
-  <h2>Historical web evidence</h2>
-  <div id="wb" class="muted">Waiting…</div>
- </section>
-
- <section class="card full">
-  <h2>Email header analyzer</h2>
-  <div class="muted" style="margin-bottom:10px">Paste a Defender-copied raw header or upload a plain-text <b>.txt/.eml</b> file. Parsing happens only in your browser; the raw header is not sent to the Worker.</div>
-  <div class="fileRow"><input id="headerFile" type="file" accept=".txt,.eml,text/plain,message/rfc822"><button class="secondary" id="parseHeader">Analyze header</button><button class="ghost" id="useFrom">Use From domain</button></div>
-  <textarea id="headerText" placeholder="Paste raw Internet headers here..."></textarea>
-  <div id="headerResult" class="muted" style="margin-top:14px">No header analyzed yet.</div>
- </section>
-
- <section class="card full">
-  <h2>Deep investigation pivots</h2>
-  <div class="deepRow"><div class="why"><b>Cisco Talos Reputation</b><div class="muted">Open Talos for domain/IP reputation. Not scraped by this app.</div></div><button class="secondary" id="talosBtn">Open Talos</button></div>
-  <div class="deepRow"><div class="why"><b>VirusTotal Domain Report</b><div class="muted">Open the current domain directly in VirusTotal without storing an API key.</div></div><button class="secondary" id="vtBtn">Open VirusTotal</button></div>
-  <div class="deepRow"><div class="why"><b>Historical WHOIS / registration epochs</b><div class="muted">Verify older registrar/registrant records and repeated registration periods.</div></div><div class="actions"><button class="ghost" id="dtBtn">DomainTools</button><button class="ghost" id="stBtn">SecurityTrails</button></div></div>
-  <div class="deepRow"><div class="why"><b>Historical website identity</b><div class="muted">Compare old pages with the current organization's identity.</div></div><button class="ghost" id="wbBtn">Open Wayback</button></div>
-  <div class="deepRow"><div class="why"><b>Certificate Transparency</b><div class="muted">Optional enrichment only; public CT availability is inconsistent.</div></div><button class="ghost" id="ctBtn">Try CT lookup</button></div>
-  <div id="ctResult" class="muted" style="margin-top:10px"></div>
- </section>
-
- <section class="card full">
-  <h2>Analyst notes</h2>
-  <div class="notes">
-   <select id="disp"><option>No disposition yet</option><option>Likely attacker-registered</option><option>Possible re-registered / repurposed domain</option><option>Possible legitimate account/service compromise</option><option>Possible domain/infrastructure takeover</option><option>Likely legitimate service abuse</option><option>Benign / insufficient evidence</option><option>Needs more investigation</option></select>
-   <textarea id="notes" placeholder="Campaign context, related senders, Defender findings, header observations, historical-WHOIS results, etc."></textarea>
+  <div class="searchbar">
+    <input id="domain" type="text" autocomplete="off">
+    <button id="go" class="btn primary"></button>
   </div>
-  <div class="actions"><button id="save">Save locally</button><button class="secondary" id="copy">Copy summary</button></div><span id="saved" class="muted"></span>
- </section>
-</div><div class="actions" style="justify-content:center;margin-top:26px">
-<button class="secondary" id="bottomTopBtn" aria-label="Back to top">↑ Back to top</button>
-</div></div>
-<button id="topBtn" aria-label="Scroll to top" title="Back to top">↑</button>
+
+  <div class="statusline">
+    <span id="s-rdap" class="status wait"></span>
+    <span id="s-dns" class="status wait"></span>
+    <span id="s-wb" class="status wait"></span>
+  </div>
+
+  <section class="heroSummary">
+    <div class="eyebrow" id="summaryEyebrow"></div>
+    <h2 id="qsHeadline"></h2>
+    <p id="qsBody"></p>
+    <div class="next" id="qsNext"></div>
+  </section>
+
+  <main class="layout">
+    <section class="card">
+      <div class="cardhead"><h3 id="h-stands"></h3><span class="hint" id="h-stands-hint"></span></div>
+      <div id="signal"></div>
+      <div id="flags"></div>
+    </section>
+
+    <section class="card">
+      <div class="cardhead"><h3 id="h-reg"></h3><span class="hint">RDAP</span></div>
+      <div id="rdap"></div>
+    </section>
+
+    <section class="card full">
+      <div class="cardhead"><h3 id="h-life"></h3><span class="hint" id="h-life-hint"></span></div>
+      <div id="lifecycle"></div>
+    </section>
+
+    <section class="card full">
+      <div class="cardhead"><h3 id="h-time"></h3></div>
+      <div id="timeline"></div>
+    </section>
+
+    <section class="card">
+      <div class="cardhead"><h3 id="h-infra"></h3><span class="hint" id="h-infra-hint"></span></div>
+      <div id="infra"></div>
+    </section>
+
+    <section class="card">
+      <div class="cardhead"><h3 id="h-web"></h3><span class="hint">Wayback</span></div>
+      <div id="wb"></div>
+    </section>
+
+    <section class="card full">
+      <div class="cardhead"><h3 id="h-header"></h3><span class="hint" id="h-header-hint"></span></div>
+      <p id="headerHelp" class="muted"></p>
+      <div class="filebar">
+        <input id="headerFile" type="file" accept=".txt,.eml,text/plain,message/rfc822">
+        <button id="parseHeader" class="btn secondary"></button>
+        <button id="useFrom" class="btn ghost"></button>
+      </div>
+      <textarea id="headerText"></textarea>
+      <div id="headerResult"></div>
+    </section>
+
+    <section class="card full">
+      <div class="cardhead"><h3 id="h-pivots"></h3></div>
+      <div class="pivot"><div><b>VirusTotal</b><p id="p-vt"></p></div><button id="vtBtn" class="btn secondary">VirusTotal</button></div>
+      <div class="pivot"><div><b>Cisco Talos</b><p id="p-talos"></p></div><button id="talosBtn" class="btn secondary">Talos</button></div>
+      <div class="pivot"><div><b>Historical WHOIS</b><p id="p-whois"></p></div><div class="actions"><button id="dtBtn" class="btn ghost">DomainTools</button><button id="stBtn" class="btn ghost">SecurityTrails</button></div></div>
+      <div class="pivot"><div><b>Wayback</b><p id="p-wayback"></p></div><button id="wbBtn" class="btn ghost">Wayback</button></div>
+      <div class="pivot"><div><b>Certificate Transparency</b><p id="p-ct"></p></div><button id="ctBtn" class="btn ghost">CT</button></div>
+      <div id="ctResult" class="muted"></div>
+    </section>
+
+    <section class="card full">
+      <div class="cardhead"><h3 id="h-notes"></h3></div>
+      <div class="notesgrid">
+        <select id="disp"></select>
+        <textarea id="notes"></textarea>
+      </div>
+      <div class="actions" style="margin-top:10px">
+        <button id="save" class="btn primary"></button>
+        <button id="copy" class="btn secondary"></button>
+      </div>
+      <div id="saved" class="muted" style="margin-top:8px"></div>
+    </section>
+  </main>
+
+  <div class="footerTop"><button id="bottomTopBtn" class="btn secondary"></button></div>
+</div>
+
+<button id="floatTop" aria-label="Back to top">↑</button>
 
 <script>
+const $=s=>document.querySelector(s);
+let current=null, parsedHeader=null;
+let LANG=localStorage.getItem("domainBackstoryLang")||"ko";
 
-const UI_TEXT={
+const L={
  ko:{
-  what:"한눈에 보기", reg:"등록 라이프사이클", life:"재등록 / 재사용 가능성", timeline:"등록 타임라인",
-  infra:"현재 인프라", web:"과거 웹 기록", header:"이메일 헤더 분석", deep:"추가 조사 바로가기", notes:"분석 메모",
-  investigate:"조사하기", analyze:"헤더 분석", useFrom:"From 도메인 사용", save:"로컬 저장", copy:"요약 복사",
-  back:"↑ 맨 위로", noDomain:"도메인을 입력해 주세요.", noDomainBody:"주요 결과와 다음 조사 방향이 여기에 표시됩니다.",
-  next:"다음 조사", start:"도메인을 먼저 조사하세요."
+  subtitle:"수상한 발신 도메인을 빠르게 판단하기 위한 조사 도구입니다. 등록정보, 현재 인프라, 과거 웹 흔적, 이메일 헤더를 한 화면에서 비교합니다.",
+  domainPH:"도메인, 이메일 주소 또는 URL을 입력하세요",
+  investigate:"조사하기",
+  statusReg:"등록정보: 대기", statusInfra:"인프라: 대기", statusWeb:"Wayback: 대기",
+  summaryEyebrow:"빠른 요약", noDomain:"도메인을 입력해 주세요.", noDomainBody:"핵심 신호와 다음 조사 방향을 여기서 먼저 보여줍니다.", next:"다음 조사", start:"도메인을 먼저 조사하세요.",
+  stands:"한눈에 보기", standsHint:"판단에 필요한 신호만", reg:"등록 라이프사이클", life:"재등록 / 재사용 가능성", lifeHint:"과거 lifecycle 단서", time:"등록 타임라인",
+  infra:"현재 인프라", infraHint:"사람이 읽기 쉽게 해석", web:"과거 웹 기록", header:"이메일 헤더 분석", headerHint:"브라우저에서만 처리",
+  headerHelp:"Defender에서 복사한 raw header를 붙여넣거나 .txt/.eml 파일을 올리세요. 헤더 원문은 Cloudflare Worker로 전송하지 않습니다.",
+  parse:"헤더 분석", useFrom:"From 도메인 사용", headerPH:"raw Internet headers를 여기에 붙여넣으세요...",
+  pivots:"추가 조사 바로가기", pvt:"도메인 평판과 탐지 결과를 확인합니다.", ptalos:"도메인/IP 평판을 수동으로 확인합니다.", pwhois:"과거 registrar/registrant와 재등록 이력을 확인할 때 사용합니다.", pwayback:"과거 사이트의 정체성과 용도 변화를 직접 비교합니다.", pct:"보조 인증서/호스트명 단서입니다. 공개 CT는 불안정할 수 있습니다.",
+  notes:"분석 메모", save:"로컬 저장", copy:"요약 복사", back:"↑ 맨 위로",
+  disp:["판정 없음","공격자 신규 등록 가능성","재등록 / 재사용 가능성","정상 계정/서비스 compromise 가능성","도메인/인프라 takeover 가능성","정상 서비스 악용 가능성","정상 또는 근거 부족","추가 조사 필요"],
+  notesPH:"캠페인 맥락, Defender 관찰 내용, header 분석 결과, historical WHOIS 결과 등을 기록하세요.",
+  loading:"조회 중…", unavailable:"조회 불가", notFound:"RDAP 등록정보 없음",
+  noStrong:"강한 lifecycle 이상 신호 없음", oldDomain:"오래 유지된 등록정보", recentChange:"최근 등록정보 변경", recentTransfer:"최근 registrar transfer",
+  inbound:"수신 메일 경로", outbound:"SPF상 발신 허용 단서", webDest:"웹/호스트 목적지", dnsMgmt:"DNS 관리",
+  noProvider:"일반/기타 provider", rawDNS:"원본 DNS 보기", meaningMX:"MX는 수신 메일 경로입니다. 특정 메일의 실제 발송 provider와 직접 비교하면 안 됩니다.",
+  summaryOld:y=>`현재 등록 약 ${y}년`, summaryChanged:d=>`등록정보 ${d}일 전 변경`, summaryTransfer:d=>`Registrar transfer ${d}일 전`,
+  summaryInbound:p=>`수신 메일: ${p}`, summaryOutbound:p=>`SPF outbound: ${p}`,
+  headlineRecent:"최근 등록된 도메인", headlineEstablished:"오래 유지된 도메인", headlineReview:"오래된 도메인이지만 최근 변경 확인 필요", headlineGeneric:"도메인 컨텍스트 확인됨",
+  nextRecent:"공격자 신규 등록 인프라 가능성을 먼저 확인하세요.", nextReview:"Historical WHOIS/DNS와 실제 메일 발송 행위를 함께 확인하세요.", nextGeneric:"VirusTotal/Talos 평판과 실제 메일 행위를 함께 확인하세요.",
+  archived:"과거 웹 사본", created:"현재 등록 시작", changed:"등록정보 변경", transfer:"Registrar transfer", expiry:"등록 만료",
+  raw:"원본 DNS", none:"없음", found:"확인됨",
+  authPass:"인증 통과", authFail:"인증 실패", observedProvider:"관찰된 발송 provider",
+  fromDomain:"From 도메인", returnDomain:"Return-Path 도메인", dkimDomain:"DKIM 서명 도메인", publicIPs:"공인 IP", receivedHops:"Received hop",
+  spfResult:"SPF 결과", dkimResult:"DKIM 결과", dmarcResult:"DMARC 결과", currentSPF:"현재 SPF", currentDMARC:"현재 DMARC",
+  mxNotOutbound:"MX와 발송 provider가 달라도 그 자체로 이상하지 않습니다.", authAbuse:"악성 메일인데 SPF/DKIM/DMARC가 모두 통과했다면 단순 spoofing보다 정상 계정·SaaS·API 자격증명 악용을 조사할 가치가 있습니다."
  },
  en:{
-  what:"What stands out", reg:"Registration lifecycle", life:"Lifecycle / possible re-registration", timeline:"Registration timeline",
-  infra:"Current infrastructure", web:"Historical web evidence", header:"Email header analyzer", deep:"Deep investigation pivots", notes:"Analyst notes",
-  investigate:"Investigate", analyze:"Analyze header", useFrom:"Use From domain", save:"Save locally", copy:"Copy summary",
-  back:"↑ Back to top", noDomain:"Enter a domain to begin.", noDomainBody:"Key findings and the next investigation direction will appear here.",
-  next:"Next step", start:"Investigate a domain first."
+  subtitle:"A fast triage tool for suspicious sender domains. Compare registration, current infrastructure, historical web evidence, and email headers in one place.",
+  domainPH:"Enter a domain, email address, or URL",
+  investigate:"Investigate",
+  statusReg:"Registration: waiting", statusInfra:"Infrastructure: waiting", statusWeb:"Wayback: waiting",
+  summaryEyebrow:"Quick summary", noDomain:"Enter a domain to begin.", noDomainBody:"Key signals and the next investigation direction appear here first.", next:"Next step", start:"Investigate a domain first.",
+  stands:"What stands out", standsHint:"Only decision-useful signals", reg:"Registration lifecycle", life:"Possible re-registration / repurposing", lifeHint:"Earlier lifecycle clues", time:"Registration timeline",
+  infra:"Current infrastructure", infraHint:"Interpreted for analysts", web:"Historical web evidence", header:"Email header analyzer", headerHint:"Processed only in browser",
+  headerHelp:"Paste a raw header copied from Defender or upload a .txt/.eml file. The raw header is not sent to the Cloudflare Worker.",
+  parse:"Analyze header", useFrom:"Use From domain", headerPH:"Paste raw Internet headers here...",
+  pivots:"Deep investigation pivots", pvt:"Check domain reputation and detections.", ptalos:"Manually check domain/IP reputation.", pwhois:"Use for registrar/registrant history and re-registration research.", pwayback:"Compare the historical identity and purpose of the site.", pct:"Optional certificate/hostname context. Public CT may be unreliable.",
+  notes:"Analyst notes", save:"Save locally", copy:"Copy summary", back:"↑ Back to top",
+  disp:["No disposition yet","Likely attacker-registered","Possible re-registered / repurposed domain","Possible legitimate account/service compromise","Possible domain/infrastructure takeover","Likely legitimate service abuse","Benign / insufficient evidence","Needs more investigation"],
+  notesPH:"Record campaign context, Defender observations, header findings, historical WHOIS results, etc.",
+  loading:"Loading…", unavailable:"Unavailable", notFound:"No RDAP registration record",
+  noStrong:"No strong lifecycle anomaly", oldDomain:"Long-established registration", recentChange:"Recent registration change", recentTransfer:"Recent registrar transfer",
+  inbound:"Inbound mail routing", outbound:"SPF outbound clues", webDest:"Web / host destination", dnsMgmt:"DNS management",
+  noProvider:"Custom / other provider", rawDNS:"Show raw DNS", meaningMX:"MX describes inbound mail routing. Do not compare it directly with the sending provider of a specific message.",
+  summaryOld:y=>`Current registration about ${y} years`, summaryChanged:d=>`Registration changed ${d} days ago`, summaryTransfer:d=>`Registrar transfer ${d} days ago`,
+  summaryInbound:p=>`Inbound mail: ${p}`, summaryOutbound:p=>`SPF outbound: ${p}`,
+  headlineRecent:"Recently registered domain", headlineEstablished:"Long-established domain", headlineReview:"Established domain with recent changes to review", headlineGeneric:"Domain context retrieved",
+  nextRecent:"Prioritize attacker-controlled infrastructure as a hypothesis.", nextReview:"Check historical WHOIS/DNS together with actual sending behavior.", nextGeneric:"Check VirusTotal/Talos reputation and actual mail behavior.",
+  archived:"Archived web copy", created:"Current registration started", changed:"Registration changed", transfer:"Registrar transfer", expiry:"Registration expires",
+  raw:"Raw DNS", none:"None", found:"Found",
+  authPass:"Authentication passed", authFail:"Authentication failed", observedProvider:"Observed sending provider",
+  fromDomain:"From domain", returnDomain:"Return-Path domain", dkimDomain:"DKIM signing domain", publicIPs:"Public IPs", receivedHops:"Received hops",
+  spfResult:"SPF result", dkimResult:"DKIM result", dmarcResult:"DMARC result", currentSPF:"Current SPF", currentDMARC:"Current DMARC",
+  mxNotOutbound:"A different MX and sending provider is not suspicious by itself.", authAbuse:"If malicious content passes SPF/DKIM/DMARC, investigate compromised mailbox, SaaS, or API credentials rather than assuming simple spoofing."
  }
 };
-let LANG=localStorage.getItem("domainBackstoryLang")||"ko";
-function setLang(lang){
- LANG=lang;localStorage.setItem("domainBackstoryLang",lang);document.documentElement.lang=lang==="ko"?"ko":"en";
- $("#langKo")?.classList.toggle("active",lang==="ko");$("#langEn")?.classList.toggle("active",lang==="en");
- const headings=[...document.querySelectorAll("h2")];
- if(headings[0])headings[0].textContent=UI_TEXT[lang].what;
- if(headings[1])headings[1].textContent=UI_TEXT[lang].reg;
- if(headings[2])headings[2].textContent=UI_TEXT[lang].life;
- if(headings[3])headings[3].textContent=UI_TEXT[lang].timeline;
- if(headings[4])headings[4].textContent=UI_TEXT[lang].infra;
- if(headings[5])headings[5].textContent=UI_TEXT[lang].web;
- if(headings[6])headings[6].textContent=UI_TEXT[lang].header;
- if(headings[7])headings[7].textContent=UI_TEXT[lang].deep;
- if(headings[8])headings[8].textContent=UI_TEXT[lang].notes;
- const setBtn=(id,txt)=>{const el=$(id);if(el)el.textContent=txt};
- setBtn("#go",UI_TEXT[lang].investigate);setBtn("#parseHeader",UI_TEXT[lang].analyze);setBtn("#useFrom",UI_TEXT[lang].useFrom);
- setBtn("#save",UI_TEXT[lang].save);setBtn("#copy",UI_TEXT[lang].copy);setBtn("#bottomTopBtn",UI_TEXT[lang].back);
- if(!current){$("#qsHeadline").textContent=UI_TEXT[lang].noDomain;$("#qsBody").textContent=UI_TEXT[lang].noDomainBody;$("#qsNext").innerHTML="<b>"+UI_TEXT[lang].next+":</b> "+UI_TEXT[lang].start;}
- else renderQuickSummary();
-}
-function tr(ko,en){return LANG==="ko"?ko:en}
 
-const $=s=>document.querySelector(s); let current=null, parsedHeader=null;
-
-function clean(x){x=(x||"").trim().toLowerCase();if(x.includes("@")&&!x.includes("://"))x=x.split("@").pop();try{if(x.includes("://"))x=new URL(x).hostname}catch{}return x.split("/")[0].split(":")[0].replace(/^\.+|\.+$/g,"")}
+function T(k,...args){const v=L[LANG][k];return typeof v==="function"?v(...args):v}
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
-function fmt(x){if(!x)return"—";const d=new Date(x);return isNaN(d)?String(x):d.toLocaleDateString()}
+function fmt(x){if(!x)return"—";const d=new Date(x);return isNaN(d)?String(x):d.toLocaleDateString(LANG==="ko"?"ko-KR":"en-US")}
 function ago(x){if(!x)return null;const d=new Date(x);return isNaN(d)?null:Math.floor((Date.now()-d)/86400000)}
-function until(x){if(!x)return null;const d=new Date(x);return isNaN(d)?null:Math.ceil((d-Date.now())/86400000)}
 function diffDays(a,b){const x=new Date(a),y=new Date(b);return(isNaN(x)||isNaN(y))?null:Math.round((y-x)/86400000)}
-function ageText(x){const n=ago(x);if(n===null)return"—";const y=Math.floor(n/365.25),m=Math.floor((n-y*365.25)/30.44);return`${y}y ${m}m`}
-async function api(path){const r=await fetch(path);let j;try{j=await r.json()}catch{throw new Error(`API returned ${r.status}`)}if(!r.ok)throw new Error(j.error||`HTTP ${r.status}`);return j}
-function status(id,state,text){const e=$("#"+id);e.className="status "+state;e.textContent=text}
-function cDate(d,type){const n=type==="expiry"?until(d):ago(d);if(n===null)return"info";if(type==="created"){if(n<90)return"bad";if(n<365)return"warn";if(n>1825)return"good"}if(type==="changed"){if(n<30)return"warn";if(n<90)return"info"}if(type==="expiry"){if(n<30)return"bad";if(n<90)return"warn"}return"info"}
-function row(k,v,c=""){return`<div class="k">${esc(k)}</div><div class="v">${c?`<span class="hl ${c}">${esc(v??"—")}</span>`:esc(v??"—")}</div>`}
+function clean(x){x=(x||"").trim().toLowerCase();if(x.includes("@")&&!x.includes("://"))x=x.split("@").pop();try{if(x.includes("://"))x=new URL(x).hostname}catch{}return x.split("/")[0].split(":")[0].replace(/^\.+|\.+$/g,"")}
+async function api(path){const r=await fetch(path);let j;try{j=await r.json()}catch{throw new Error("HTTP "+r.status)}if(!r.ok)throw new Error(j.error||("HTTP "+r.status));return j}
+function setStatus(id,state,text){const el=$(id);el.className="status "+state;el.textContent=text}
+function tag(value,cls="info"){return `<span class="tag ${cls}">${esc(value??"—")}</span>`}
+function kvRow(k,v,cls=""){return `<div class="k">${esc(k)}</div><div class="v">${cls?tag(v,cls):esc(v??"—")}</div>`}
+
+function setLanguage(lang){
+  LANG=lang;localStorage.setItem("domainBackstoryLang",lang);document.documentElement.lang=lang;
+  $("#langKo").classList.toggle("active",lang==="ko");$("#langEn").classList.toggle("active",lang==="en");
+  $("#subtitle").textContent=T("subtitle");$("#domain").placeholder=T("domainPH");$("#go").textContent=T("investigate");
+  $("#h-stands").textContent=T("stands");$("#h-stands-hint").textContent=T("standsHint");$("#h-reg").textContent=T("reg");
+  $("#h-life").textContent=T("life");$("#h-life-hint").textContent=T("lifeHint");$("#h-time").textContent=T("time");
+  $("#h-infra").textContent=T("infra");$("#h-infra-hint").textContent=T("infraHint");$("#h-web").textContent=T("web");
+  $("#h-header").textContent=T("header");$("#h-header-hint").textContent=T("headerHint");$("#headerHelp").textContent=T("headerHelp");
+  $("#parseHeader").textContent=T("parse");$("#useFrom").textContent=T("useFrom");$("#headerText").placeholder=T("headerPH");
+  $("#h-pivots").textContent=T("pivots");$("#p-vt").textContent=T("pvt");$("#p-talos").textContent=T("ptalos");$("#p-whois").textContent=T("pwhois");$("#p-wayback").textContent=T("pwayback");$("#p-ct").textContent=T("pct");
+  $("#h-notes").textContent=T("notes");$("#save").textContent=T("save");$("#copy").textContent=T("copy");$("#notes").placeholder=T("notesPH");$("#bottomTopBtn").textContent=T("back");
+  const disp=$("#disp");const val=disp.selectedIndex;disp.innerHTML=T("disp").map(x=>`<option>${esc(x)}</option>`).join("");disp.selectedIndex=Math.max(0,val);
+  if(!current){$("#summaryEyebrow").textContent=T("summaryEyebrow");$("#qsHeadline").textContent=T("noDomain");$("#qsBody").textContent=T("noDomainBody");$("#qsNext").innerHTML=`<b>${esc(T("next"))}:</b> ${esc(T("start"))}`;setStatus("s-rdap","wait",T("statusReg"));setStatus("s-dns","wait",T("statusInfra"));setStatus("s-wb","wait",T("statusWeb"));}
+  else renderAll();
+}
 
 function providerFromHostnames(items){
  const s=(items||[]).join(" ").toLowerCase();
- const rules=[
-  ["Sophos",["hydra.sophos.com","sophos.com"]],
-  ["Microsoft 365",["protection.outlook.com","outlook.com"]],
-  ["Google Workspace",["google.com","googlemail.com"]],
-  ["Proofpoint",["pphosted.com","proofpoint"]],
-  ["Mimecast",["mimecast.com"]],
-  ["Barracuda",["barracudanetworks.com","barracuda"]],
-  ["Cloudflare",["cloudflare.com"]]
- ];
+ const rules=[["Sophos",["hydra.sophos.com","sophos.com"]],["Microsoft 365",["protection.outlook.com","outlook.com"]],["Google Workspace",["google.com","googlemail.com"]],["Proofpoint",["pphosted.com","proofpoint"]],["Mimecast",["mimecast.com"]],["Barracuda",["barracuda"]],["Cloudflare",["cloudflare.com"]]];
  for(const [n,needles] of rules)if(needles.some(x=>s.includes(x)))return n;return null;
 }
 function spfProviders(spf){
  const s=String(spf||"").toLowerCase(),out=[];
- const rules=[
-  ["Microsoft 365",["spf.protection.outlook.com"]],
-  ["Google Workspace",["_spf.google.com"]],
-  ["Mailgun",["mailgun"]],
-  ["SendGrid",["sendgrid"]],
-  ["Amazon SES",["amazonses"]],
-  ["Mandrill",["mandrill"]],
-  ["Proofpoint",["pphosted"]],
-  ["Sophos",["sophos"]],
-  ["Mimecast",["mimecast"]]
- ];
- for(const [n,needles] of rules)if(needles.some(x=>s.includes(x)))out.push(n);
- return out;
-}
-
-
-function renderQuickSummary(){
- if(!current)return;
- const r=current?.rdap||{},d=current?.dns||{},m=current?.maildns||{};
- const lines=[];let headline=tr("도메인 컨텍스트 확인됨","Domain context retrieved");
- let next=tr("평판과 실제 메일 행위를 함께 확인하세요.","Check reputation and actual mail behavior next.");
- if(r.created){
-  const n=ago(r.created);
-  if(n<90){headline=tr("최근 등록된 도메인","Recently registered domain");lines.push(tr(`현재 등록이 ${n}일 전 시작됨`,`Current registration started ${n} days ago`));next=tr("공격자 등록 인프라 가능성을 우선 확인하세요.","Prioritize attacker-controlled infrastructure as a hypothesis.");}
-  else if(n>1825)lines.push(tr(`현재 등록 약 ${Math.floor(n/365.25)}년`,`Current registration about ${Math.floor(n/365.25)} years`));
- }
- if(r.changed&&ago(r.changed)>=0&&ago(r.changed)<30)lines.push(tr(`등록정보 ${ago(r.changed)}일 전 변경`,`Registration record changed ${ago(r.changed)} days ago`));
- if(r.transfer&&ago(r.transfer)>=0&&ago(r.transfer)<90)lines.push(tr(`Registrar transfer ${ago(r.transfer)}일 전`,`Registrar transfer ${ago(r.transfer)} days ago`));
- const mx=(d.MX||[]).join(" ");
- const provider=providerFromHostnames?providerFromHostnames(d.MX||[]):null;
- if(provider)lines.push(tr(`수신 메일 게이트웨이: ${provider}`,`Inbound mail gateway: ${provider}`));
- const outs=(typeof spfProviders==="function")?spfProviders(m.spf||""):[];
- if(outs.length)lines.push(tr(`SPF outbound 단서: ${outs.join(", ")}`,`SPF outbound clues: ${outs.join(", ")}`));
- if(parsedHeader?.observedProvider)next=tr(`실제 발송 인프라(${parsedHeader.observedProvider})와 SPF/DKIM/DMARC를 비교하세요.`,`Compare the observed sending provider (${parsedHeader.observedProvider}) with SPF/DKIM/DMARC.`);
- $("#qsHeadline").textContent=headline;
- $("#qsBody").textContent=lines.length?lines.join(" · "):tr("아직 강한 신호가 없습니다.","No strong signal yet.");
- $("#qsNext").innerHTML="<b>"+UI_TEXT[LANG].next+":</b> "+esc(next);
+ const rules=[["Microsoft 365",["spf.protection.outlook.com"]],["Google Workspace",["_spf.google.com"]],["Mailgun",["mailgun"]],["SendGrid",["sendgrid"]],["Amazon SES",["amazonses"]],["Mandrill",["mandrill"]],["Proofpoint",["pphosted"]],["Sophos",["sophos"]],["Mimecast",["mimecast"]]];
+ for(const [n,needles] of rules)if(needles.some(x=>s.includes(x)))out.push(n);return out;
 }
 
 async function investigate(){
- const d=clean($("#domain").value);if(!d||!d.includes("."))return alert("Enter a valid domain.");
- $("#domain").value=d;current={domain:d,rdap:null,dns:null,wb:null,maildns:null,errors:{}};
- ["rdap","infra","wb","timeline","lifecycle"].forEach(id=>$("#"+id).textContent="Looking up…");$("#signal").textContent="Building context…";$("#flags").innerHTML="";$("#ctResult").textContent="";
- status("s-rdap","wait","Registration: loading");status("s-dns","wait","Infrastructure: loading");status("s-wb","wait","Wayback: loading");
+ const d=clean($("#domain").value);if(!d||!d.includes("."))return alert(LANG==="ko"?"유효한 도메인을 입력하세요.":"Enter a valid domain.");
+ $("#domain").value=d;current={domain:d,rdap:null,dns:null,maildns:null,wb:null,errors:{}};
+ $("#rdap").textContent=T("loading");$("#infra").textContent=T("loading");$("#wb").textContent=T("loading");$("#timeline").textContent=T("loading");$("#lifecycle").textContent=T("loading");
+ setStatus("s-rdap","wait",LANG==="ko"?"등록정보: 조회 중":"Registration: loading");
+ setStatus("s-dns","wait",LANG==="ko"?"인프라: 조회 중":"Infrastructure: loading");
+ setStatus("s-wb","wait","Wayback: loading");
  const jobs=[
-  api("/api/rdap?domain="+encodeURIComponent(d)).then(x=>{current.rdap=x;renderRDAP(x);status("s-rdap","ok",x.cached?"Registration: OK · cached":"Registration: OK")}).catch(e=>{
- current.errors.rdap=e.message;
- const notFound=/404|not found/i.test(e.message||"");
- const title=notFound?"Registration record not found via RDAP":"Registration lookup unavailable";
- const detail=notFound
-   ?"RDAP did not return a registration object. This does not mean the hostname or website is nonexistent or benign."
-   :"The RDAP providers did not return usable registration data. Treat registration context as unavailable, not as a threat signal.";
- const d=current?.domain||clean($("#domain").value);
- const icann="https://lookup.icann.org/en/lookup?name="+encodeURIComponent(d);
- const dt="https://whois.domaintools.com/"+encodeURIComponent(d);
- $("#rdap").innerHTML=`<div class="signal ${notFound?"info":"bad"}"><div class="big">${esc(title)}</div><div class="muted">${esc(detail)}</div></div>
- <div class="actions">
-  <button class="secondary" onclick="window.open('${icann}','_blank','noopener')">Check ICANN Lookup</button>
-  <button class="ghost" onclick="window.open('${dt}','_blank','noopener')">Check WHOIS</button>
-  <button class="ghost" onclick="investigate()">Retry RDAP</button>
- </div>
- <div class="callout muted">Manual WHOIS/registry results may still be limited or redacted, but they are the best next check when automated RDAP does not return a record.</div>`;
- status("s-rdap",notFound?"wait":"fail",notFound?"Registration: RDAP record not found":"Registration: unavailable");
-}),
-  api("/api/dns?domain="+encodeURIComponent(d)).then(x=>{current.dns=x;renderInfrastructure();status("s-dns","ok",x.cached?"Infrastructure: OK · cached":"Infrastructure: OK")}).catch(e=>{current.errors.dns=e.message;$("#infra").innerHTML=`<span class="bad-text">LOOKUP FAILED: ${esc(e.message)}</span>`;status("s-dns","fail","Infrastructure: failed")}),
-  api("/api/maildns?domain="+encodeURIComponent(d)).then(x=>{current.maildns=x;renderInfrastructure()}).catch(()=>{}),
-  api("/api/wayback?domain="+encodeURIComponent(d)).then(x=>{current.wb=x;renderWB(x);status("s-wb","ok",x.cached?"Wayback: OK · cached":"Wayback: OK")}).catch(e=>{current.errors.wb=e.message;$("#wb").innerHTML=`<span class="muted">Wayback unavailable: ${esc(e.message)}</span>`;status("s-wb","fail","Wayback: unavailable")})
+  api("/api/rdap?domain="+encodeURIComponent(d)).then(x=>{current.rdap=x;setStatus("s-rdap","ok",LANG==="ko"?"등록정보: 확인됨":"Registration: OK")}).catch(e=>{current.errors.rdap=e.message;setStatus("s-rdap","fail",LANG==="ko"?"등록정보: 조회 불가":"Registration: unavailable")}),
+  api("/api/dns?domain="+encodeURIComponent(d)).then(x=>{current.dns=x;setStatus("s-dns","ok",LANG==="ko"?"인프라: 확인됨":"Infrastructure: OK")}).catch(e=>{current.errors.dns=e.message;setStatus("s-dns","fail",LANG==="ko"?"인프라: 조회 불가":"Infrastructure: unavailable")}),
+  api("/api/maildns?domain="+encodeURIComponent(d)).then(x=>current.maildns=x).catch(()=>{}),
+  api("/api/wayback?domain="+encodeURIComponent(d)).then(x=>{current.wb=x;setStatus("s-wb","ok","Wayback: OK")}).catch(e=>{current.errors.wb=e.message;setStatus("s-wb","fail","Wayback: unavailable")})
  ];
- await Promise.allSettled(jobs);renderQuickSummary();renderSignal();renderLifecycle();renderTimeline();loadSaved();if(parsedHeader)renderHeaderComparison();
+ await Promise.allSettled(jobs);renderAll();loadSaved();
 }
 
-function renderRDAP(x){
- $("#rdap").innerHTML='<div class="kv">'+row("Current registration created",fmt(x.created),cDate(x.created,"created"))+row("Domain record changed",fmt(x.changed),cDate(x.changed,"changed"))+row("Last registrar transfer",fmt(x.transfer),x.transfer?"info":"")+row("Registry expires",fmt(x.expires),cDate(x.expires,"expiry"))+row("Registrar expires",fmt(x.registrar_expires),cDate(x.registrar_expires,"expiry"))+row("Current registration age",x.created?ageText(x.created):"—",x.created&&ago(x.created)>1825?"good":"info")+row("Registrar",x.registrar||"—")+row("Registrar IANA ID",x.registrar_iana_id||"—")+row("Nameservers",(x.nameservers||[]).join(", ")||"—")+'</div><div class="callout muted">Current creation date is not guaranteed to be first-ever registration. Historical WHOIS is needed to enumerate earlier registration epochs.</div>';
+function renderAll(){renderQuickSummary();renderSignals();renderRegistration();renderLifecycle();renderTimeline();renderInfrastructure();renderWayback();if(parsedHeader)renderHeaderComparison()}
+function renderQuickSummary(){
+ const r=current?.rdap||{},d=current?.dns||{},m=current?.maildns||{};
+ let headline=T("headlineGeneric"),next=T("nextGeneric");const bits=[];
+ if(r.created){const n=ago(r.created);if(n<90){headline=T("headlineRecent");next=T("nextRecent");bits.push(LANG==="ko"?`현재 등록 ${n}일`:`Current registration ${n} days`)}else if(n>1825){const y=Math.floor(n/365.25);headline=T("headlineEstablished");bits.push(T("summaryOld",y))}}
+ if(r.changed&&ago(r.changed)>=0&&ago(r.changed)<30){const d2=ago(r.changed);headline=T("headlineReview");next=T("nextReview");bits.push(T("summaryChanged",d2))}
+ if(r.transfer&&ago(r.transfer)>=0&&ago(r.transfer)<90){bits.push(T("summaryTransfer",ago(r.transfer)))}
+ const inb=providerFromHostnames(d.MX||[]);if(inb)bits.push(T("summaryInbound",inb));
+ const outs=spfProviders(m.spf||"");if(outs.length)bits.push(T("summaryOutbound",outs.join(", ")));
+ $("#summaryEyebrow").textContent=T("summaryEyebrow");$("#qsHeadline").textContent=headline;$("#qsBody").textContent=bits.length?bits.join(" · "):(LANG==="ko"?"아직 강한 신호가 없습니다.":"No strong signal yet.");$("#qsNext").innerHTML=`<b>${esc(T("next"))}:</b> ${esc(next)}`;
 }
-function rawBox(title,vals){const a=vals||[];return`<div class="rawbox"><b>${esc(title)}</b>${a.length?a.map(v=>`<div class="mono">${esc(v)}</div>`).join(""):'<div class="muted">None returned</div>'}</div>`}
-function renderInfrastructure(){
- const d=current?.dns||{},m=current?.maildns||{};
- const inbound=providerFromHostnames(d.MX)||"Provider not recognized";
- const dnsProvider=providerFromHostnames(d.NS)||((d.NS||[]).length?"Custom / other DNS provider":"Unknown");
- const web=(d.A||[]).length?d.A.join(", "):(d.CNAME||[]).length?d.CNAME.join(", "):"No A/CNAME returned";
- const outbound=spfProviders(m.spf);
- let h='<div class="infra">';
- h+=`<div class="infrabox"><div class="label">Web / host destination</div><div class="value">${esc(web)}</div><div class="meaning">Where the root domain currently resolves. Useful as an IP/hosting pivot, not a reputation verdict.</div></div>`;
- h+=`<div class="infrabox"><div class="label">Inbound email gateway</div><div class="value">${esc(inbound)}</div><div class="meaning">${esc((d.MX||[]).slice(0,2).join(" · ")||"No MX returned")}<br><b>MX describes incoming mail routing, not the provider that sent a specific message.</b></div></div>`;
- h+=`<div class="infrabox"><div class="label">Authorized outbound clues (SPF)</div><div class="value">${esc(outbound.length?outbound.join(", "):m.spf?"No common provider recognized":"SPF not returned")}</div><div class="meaning">${esc(m.spf||"No SPF record returned")}</div></div>`;
- h+=`<div class="infrabox"><div class="label">DNS management</div><div class="value">${esc(dnsProvider)}</div><div class="meaning">${esc((d.NS||[]).join(" · ")||"No NS returned")}<br>Historical NS changes can be more useful than the current value alone.</div></div>`;
- h+='</div>';
- if(m.dmarc)h+=`<div class="callout muted"><b>DMARC:</b> ${esc(m.dmarc)}</div>`;
- h+='<details><summary>Show raw DNS records</summary><div class="rawdns">'+rawBox("A",d.A)+rawBox("AAAA",d.AAAA)+rawBox("MX",d.MX)+rawBox("NS",d.NS)+rawBox("CNAME",d.CNAME)+rawBox("SOA",d.SOA)+'</div></details>';
- $("#infra").innerHTML=h;
+function renderSignals(){
+ const r=current?.rdap||{},f=[];
+ if(r.created&&ago(r.created)<90)f.push(["bad",LANG==="ko"?"최근 등록": "Recently registered",LANG==="ko"?`현재 등록이 ${ago(r.created)}일 전 시작됐습니다.`:`Current registration started ${ago(r.created)} days ago.`]);
+ if(r.changed&&ago(r.changed)>=0&&ago(r.changed)<30)f.push(["warn",T("recentChange"),LANG==="ko"?`RDAP 등록정보가 ${ago(r.changed)}일 전 변경됐습니다. 무엇이 바뀌었는지는 RDAP만으로 알 수 없습니다.`:`RDAP record changed ${ago(r.changed)} days ago; RDAP does not identify the changed field.`]);
+ if(r.transfer&&ago(r.transfer)>=0&&ago(r.transfer)<90)f.push(["warn",T("recentTransfer"),fmt(r.transfer)]);
+ if(r.created&&ago(r.created)>1825)f.push(["good",T("oldDomain"),LANG==="ko"?`현재 lifecycle은 약 ${Math.floor(ago(r.created)/365.25)}년입니다.`:`Current lifecycle is about ${Math.floor(ago(r.created)/365.25)} years.`]);
+ $("#signal").innerHTML=f.length?f.map(([c,t,b])=>`<div class="notice ${c}"><b>${esc(t)}</b><p>${esc(b)}</p></div>`).join(""):`<div class="notice info"><b>${esc(T("noStrong"))}</b><p>${esc(LANG==="ko"?"평판, 실제 메일 발송 행위, 헤더 분석을 함께 보세요.":"Use reputation, actual sending behavior, and header analysis together.")}</p></div>`;
+ $("#flags").innerHTML="";
 }
-function renderWB(x){
- const o=x.oldest,l=x.latest;let h='<div class="kv">'+row("Oldest snapshot returned",fmt(o?.timestamp),o?.available?"good":"info")+row("Latest snapshot returned",fmt(l?.timestamp))+row("Old archived page",o?.available?"Found":"Not returned",o?.available?"good":"info")+'</div>';
- if(o?.url)h+=`<div style="margin-top:10px"><a target="_blank" href="${esc(o.url)}">View older archived copy</a></div>`;if(l?.url)h+=`<div style="margin-top:6px"><a target="_blank" href="${esc(l.url)}">View latest archived copy</a></div>`;
- h+='<div class="callout muted">A snapshot is an archived copy, not a website-creation or ownership-change date.</div>';$("#wb").innerHTML=h;
+function renderRegistration(){
+ if(!current?.rdap){
+  const msg=current?.errors?.rdap||T("unavailable");const d=current?.domain||"";
+  $("#rdap").innerHTML=`<div class="notice info"><b>${esc(/404/.test(msg)?T("notFound"):T("unavailable"))}</b><p>${esc(msg)}</p></div><div class="actions"><button class="btn secondary" onclick="window.open('https://lookup.icann.org/en/lookup?name=${encodeURIComponent(d)}','_blank')">ICANN</button><button class="btn ghost" onclick="window.open('https://whois.domaintools.com/${encodeURIComponent(d)}','_blank')">WHOIS</button></div>`;return;
+ }
+ const r=current.rdap;
+ $("#rdap").innerHTML=`<div class="kv">
+ ${kvRow(LANG==="ko"?"현재 등록 시작":"Current registration created",fmt(r.created),r.created&&ago(r.created)>1825?"good":"info")}
+ ${kvRow(LANG==="ko"?"등록정보 변경":"Registration changed",fmt(r.changed),r.changed&&ago(r.changed)<30?"warn":"info")}
+ ${kvRow(LANG==="ko"?"최근 registrar transfer":"Last registrar transfer",fmt(r.transfer))}
+ ${kvRow(LANG==="ko"?"만료일":"Expires",fmt(r.expires))}
+ ${kvRow("Registrar",r.registrar||"—")}
+ ${kvRow(LANG==="ko"?"네임서버":"Nameservers",(r.nameservers||[]).join(", ")||"—")}
+ </div>`;
 }
-function priorLifecycle(){const r=current?.rdap,w=current?.wb;if(!r?.created||!w?.oldest?.available||!w.oldest.timestamp)return{state:"unknown",gap:null};const gap=diffDays(w.oldest.timestamp,r.created);return gap!==null&&gap>30?{state:"yes",gap}:{state:"no",gap}}
 function renderLifecycle(){
- const r=current?.rdap,p=priorLifecycle();
- if(!r){
- const d=current?.domain||clean($("#domain").value);
- const icann="https://lookup.icann.org/en/lookup?name="+encodeURIComponent(d);
- const dt="https://whois.domaintools.com/"+encodeURIComponent(d);
- $("#lifecycle").innerHTML=`<div class="signal info"><div class="big">Lifecycle unavailable from RDAP</div><div class="muted">No lifecycle inference is made without registration data. DNS, header, reputation, and sandbox evidence can still be evaluated independently.</div></div>
- <div class="actions"><button class="secondary" onclick="window.open('${icann}','_blank','noopener')">Check ICANN Lookup</button><button class="ghost" onclick="window.open('${dt}','_blank','noopener')">Check WHOIS</button></div>`;
- return;
-}let pv=p.state==="yes"?"YES — archived web predates current registration":p.state==="no"?"No evidence from lightweight archive check":"Unknown";
- $("#lifecycle").innerHTML=`<div class="lifecycle"><div class="lifeBox"><div class="label">Current registration started</div><div class="value">${esc(fmt(r?.created))}</div></div><div class="lifeBox"><div class="label">Last registrar transfer</div><div class="value">${esc(r?.transfer?fmt(r.transfer):"Not reported")}</div></div><div class="lifeBox"><div class="label">Earlier web-lifecycle evidence</div><div class="value">${esc(pv)}</div></div></div>`;
- if(p.state==="yes")$("#lifecycle").innerHTML+=`<div class="signal warn" style="margin-top:12px"><div class="big">Possible re-registration / repurposing clue</div><div class="muted">Archived web evidence predates current registration by about ${(p.gap/365.25).toFixed(1)} years. Verify with historical WHOIS/passive DNS.</div></div>`;
- $("#lifecycle").innerHTML+=`<div class="kv" style="margin-top:14px">${row("Exact re-registration count","Not determinable from free RDAP")}${row("Inactive gap length","Not determinable without historical registration/DNS data")}${row("Best verification","Historical WHOIS / passive DNS")}</div>`;
+ const r=current?.rdap,w=current?.wb;if(!r){$("#lifecycle").innerHTML=`<div class="notice info"><b>${esc(T("unavailable"))}</b><p>${esc(LANG==="ko"?"등록정보가 없어 lifecycle 추정은 하지 않습니다.":"No lifecycle inference is made without registration data.")}</p></div>`;return;}
+ let earlier=false,gap=null;if(r.created&&w?.oldest?.available&&w.oldest.timestamp){gap=diffDays(w.oldest.timestamp,r.created);earlier=gap>30}
+ $("#lifecycle").innerHTML=`<div class="notice ${earlier?"warn":"info"}"><b>${esc(earlier?(LANG==="ko"?"이전 lifecycle 흔적 가능":"Possible earlier lifecycle"):(LANG==="ko"?"확정 가능한 재등록 이력 없음":"No confirmed re-registration history"))}</b><p>${esc(earlier?(LANG==="ko"?`현재 등록보다 약 ${(gap/365.25).toFixed(1)}년 앞선 archived web evidence가 있습니다. Historical WHOIS로 확인하세요.`:`Archived web evidence predates current registration by about ${(gap/365.25).toFixed(1)} years. Verify with historical WHOIS.`):(LANG==="ko"?"무료 RDAP만으로 재등록 횟수나 inactive gap은 정확히 알 수 없습니다.":"Free RDAP cannot determine exact re-registration count or inactive gaps."))}</p></div>`;
 }
-function renderSignal(){
- const r=current.rdap,d=current.dns,p=priorLifecycle();const positive=[],attention=[];
- if(r?.created){const n=ago(r.created);if(n<90)attention.push(["bad","Recently registered",`Current registration started ${n} days ago.`]);else if(n<365)attention.push(["warn","Young current registration","Current registration is under one year old."]);else if(n>1825)positive.push(["good","Long-established current registration",`Current lifecycle is about ${Math.floor(n/365.25)} years old.`])}
- if(r?.changed&&ago(r.changed)>=0&&ago(r.changed)<30)attention.push(["warn","Recent registration change",`RDAP says the record changed ${ago(r.changed)} days ago; it does not identify the field.`]);
- if(r?.transfer&&ago(r.transfer)>=0&&ago(r.transfer)<90)attention.push(["warn","Recent registrar transfer",`RDAP reports a registrar transfer ${ago(r.transfer)} days ago.`]);
- if(p.state==="yes")attention.push(["warn","Earlier lifecycle evidence",`Archived web content predates current registration by about ${(p.gap/365.25).toFixed(1)} years.`]);
- let cls="info",title="Domain context retrieved";
- if(attention.some(x=>x[0]==="bad")){cls="bad";title="Strong lifecycle clue — investigate further"}else if(attention.length){cls="warn";title="Established context with changes worth reviewing"}else if(positive.length){cls="good";title="Established current registration context"}
- $("#signal").innerHTML=`<div class="signal ${cls}"><div class="big">${esc(title)}</div><div class="muted">Signals are independent; an old domain does not cancel a recent registration change.</div></div>`;
- const f=[...attention,...positive];
- if(current?.maildns?.spf){const ps=spfProviders(current.maildns.spf);f.push(["info","Outbound authorization clues",ps.length?`SPF references: ${ps.join(", ")}`:"SPF exists, but no common provider was recognized."])}
- if(d?.MX?.length)f.push(["info","Inbound mail routing",`MX: ${d.MX.slice(0,2).join(" · ")}. This does not identify the outbound provider used by a specific message.`]);
- if(!f.length)f.push(["info","No major lifecycle flag","Use reputation, message behavior, and internal telemetry next."]);
- $("#flags").innerHTML=f.map(([c,t,b])=>`<div class="flag"><div class="flag-title ${c}-text">${esc(t)}</div><div class="muted">${esc(b)}</div></div>`).join("");
+function renderTimeline(){
+ const r=current?.rdap,w=current?.wb,e=[];if(w?.oldest?.timestamp)e.push([w.oldest.timestamp,T("archived")]);if(r?.created)e.push([r.created,T("created")]);if(r?.transfer)e.push([r.transfer,T("transfer")]);if(r?.changed)e.push([r.changed,T("changed")]);if(r?.expires)e.push([r.expires,T("expiry")]);e.sort((a,b)=>new Date(a[0])-new Date(b[0]));
+ $("#timeline").innerHTML=e.length?`<div class="timeline">${e.map(([d,t])=>`<div class="event"><div class="date">${esc(fmt(d))}</div><b>${esc(t)}</b></div>`).join("")}</div>`:`<div class="muted">${esc(T("unavailable"))}</div>`;
 }
-function renderTimeline(){const r=current.rdap,w=current.wb,e=[];if(w?.oldest?.timestamp)e.push([w.oldest.timestamp,"Old archived web copy"]);if(r?.created)e.push([r.created,"Current registration created"]);if(r?.transfer)e.push([r.transfer,"Registrar transfer"]);if(r?.changed)e.push([r.changed,"Domain record changed"]);if(r?.expires)e.push([r.expires,"Registry expiration"]);e.sort((a,b)=>new Date(a[0])-new Date(b[0]));$("#timeline").innerHTML=e.length?'<div class="timeline">'+e.map(([d,t])=>`<div class="event"><div class="date">${esc(fmt(d))}</div><b>${esc(t)}</b></div>`).join("")+'</div>':'<span class="muted">No timeline data returned.</span>'}
+function rawBox(t,vals){const a=vals||[];return `<div class="rawbox"><b>${esc(t)}</b>${a.length?a.map(v=>`<div class="mono">${esc(v)}</div>`).join(""):`<div class="muted">${esc(T("none"))}</div>`}</div>`}
+function renderInfrastructure(){
+ const d=current?.dns||{},m=current?.maildns||{};if(!current?.dns){$("#infra").innerHTML=`<div class="notice info"><b>${esc(T("unavailable"))}</b><p>${esc(current?.errors?.dns||"")}</p></div>`;return;}
+ const inbound=providerFromHostnames(d.MX||[])||T("noProvider"),dnsProvider=providerFromHostnames(d.NS||[])||T("noProvider"),outs=spfProviders(m.spf||[]);
+ const web=(d.A||[]).length?(d.A||[]).join(", "):(d.CNAME||[]).length?(d.CNAME||[]).join(", "):T("none");
+ $("#infra").innerHTML=`<div class="infragrid">
+  <div class="infra"><div class="label">${esc(T("webDest"))}</div><div class="value">${esc(web)}</div><div class="meaning">${esc(LANG==="ko"?"현재 root domain이 향하는 IP/호스트입니다. 평판 판단이 아니라 pivot 용도입니다.":"Current root-domain destination. Use as a pivot, not a reputation verdict.")}</div></div>
+  <div class="infra"><div class="label">${esc(T("inbound"))}</div><div class="value">${esc(inbound)}</div><div class="meaning">${esc(T("meaningMX"))}</div></div>
+  <div class="infra"><div class="label">${esc(T("outbound"))}</div><div class="value">${esc(outs.length?outs.join(", "):(m.spf?T("noProvider"):T("none")))}</div><div class="meaning">${esc(m.spf||"")}</div></div>
+  <div class="infra"><div class="label">${esc(T("dnsMgmt"))}</div><div class="value">${esc(dnsProvider)}</div><div class="meaning">${esc((d.NS||[]).join(" · ")||T("none"))}</div></div>
+ </div>
+ <details><summary>${esc(T("rawDNS"))}</summary><div class="rawgrid">${rawBox("A",d.A)}${rawBox("AAAA",d.AAAA)}${rawBox("MX",d.MX)}${rawBox("NS",d.NS)}${rawBox("CNAME",d.CNAME)}${rawBox("SOA",d.SOA)}</div></details>`;
+}
+function renderWayback(){
+ const w=current?.wb;if(!w){$("#wb").innerHTML=`<div class="notice info"><b>${esc(T("unavailable"))}</b><p>${esc(current?.errors?.wb||"")}</p></div>`;return;}
+ const o=w.oldest,l=w.latest;
+ $("#wb").innerHTML=`<div class="kv">${kvRow(LANG==="ko"?"오래된 사본":"Older snapshot",fmt(o?.timestamp),o?.available?"good":"info")}${kvRow(LANG==="ko"?"최근 사본":"Latest snapshot",fmt(l?.timestamp))}</div>
+ <div class="notice info" style="margin-top:10px"><p>${esc(LANG==="ko"?"Wayback snapshot은 당시 웹페이지 사본입니다. 사이트 생성일이나 소유권 변경일을 뜻하지 않습니다.":"A Wayback snapshot is an archived copy, not a website-creation or ownership-change date.")}</p></div>`;
+}
 
-/* Header analyzer */
+/* Header parsing */
 function unfold(raw){return raw.replace(/\r?\n[ \t]+/g," ")}
 function headerValues(raw,name){const u=unfold(raw),re=new RegExp("^"+name.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+":\\s*(.*)$","gmi");let m,a=[];while((m=re.exec(u)))a.push(m[1].trim());return a}
 function emailDomain(s){const m=String(s||"").match(/@([A-Za-z0-9.-]+\.[A-Za-z]{2,})/);return m?m[1].toLowerCase():null}
 function domainFromToken(s){return emailDomain(s)||(String(s||"").match(/\b(?:[a-z0-9-]+\.)+[a-z]{2,}\b/i)?.[0]?.toLowerCase()||null)}
 function publicIPs(text){const ips=String(text||"").match(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g)||[];return ips.filter(ip=>{const p=ip.split(".").map(Number);return !(p[0]===10||p[0]===127||(p[0]===192&&p[1]===168)||(p[0]===172&&p[1]>=16&&p[1]<=31)||(p[0]===169&&p[1]===254))})}
-function sendingProvider(text){
- const s=String(text||"").toLowerCase(),rules=[["Mailgun",["mailgun"]],["SendGrid",["sendgrid"]],["Mandrill",["mandrill"]],["Amazon SES",["amazonses"]],["Microsoft 365",["outbound.protection.outlook.com","protection.outlook.com"]],["Google Workspace",["google.com","googlemail.com"]],["Proofpoint",["pphosted","proofpoint"]],["Sophos",["hydra.sophos.com","sophos.com"]],["Mimecast",["mimecast.com"]]];
- for(const [n,needles] of rules)if(needles.some(x=>s.includes(x)))return n;return null;
-}
+function sendingProvider(text){const s=String(text||"").toLowerCase(),rules=[["Mailgun",["mailgun"]],["SendGrid",["sendgrid"]],["Mandrill",["mandrill"]],["Amazon SES",["amazonses"]],["Microsoft 365",["outbound.protection.outlook.com","protection.outlook.com"]],["Google Workspace",["google.com","googlemail.com"]],["Proofpoint",["pphosted","proofpoint"]],["Sophos",["hydra.sophos.com","sophos.com"]],["Mimecast",["mimecast.com"]]];for(const [n,needles] of rules)if(needles.some(x=>s.includes(x)))return n;return null}
 function parseAuth(raw){const all=headerValues(raw,"Authentication-Results").join(" ; ");return{raw:all,spf:(all.match(/\bspf=(pass|fail|softfail|neutral|temperror|permerror|none)\b/i)||[])[1]?.toLowerCase()||null,dkim:(all.match(/\bdkim=(pass|fail|neutral|temperror|permerror|none)\b/i)||[])[1]?.toLowerCase()||null,dmarc:(all.match(/\bdmarc=(pass|fail|bestguesspass|none)\b/i)||[])[1]?.toLowerCase()||null,mailfrom:(all.match(/smtp\.mailfrom=([^\s;]+)/i)||[])[1]?.replace(/[<>]/g,"")||null,headerFrom:(all.match(/header\.from=([^\s;]+)/i)||[])[1]||null,dkimDomain:(all.match(/header\.d=([^\s;]+)/i)||[])[1]||null}}
-function parseHeader(raw){const from=headerValues(raw,"From")[0]||null,ret=headerValues(raw,"Return-Path")[0]||null,sender=headerValues(raw,"Sender")[0]||null,received=headerValues(raw,"Received"),auth=parseAuth(raw);const recText=received.join("\n");return{from,fromDomain:emailDomain(from)||auth.headerFrom,returnPath:ret,returnDomain:emailDomain(ret)||domainFromToken(auth.mailfrom),sender,senderDomain:emailDomain(sender),receivedCount:received.length,publicIPs:publicIPs(recText),observedProvider:sendingProvider(recText+" "+ret+" "+auth.raw),auth}}
-function aligned(a,b){if(!a||!b)return null;a=a.toLowerCase();b=b.toLowerCase();return a===b||a.endsWith("."+b)||b.endsWith("."+a)}
-function providerAuthorized(spf,provider){if(!provider||!spf)return null;return spfProviders(spf).includes(provider)}
-async function analyzeHeader(){const raw=$("#headerText").value;if(!raw.trim())return alert("Paste or upload a header first.");parsedHeader=parseHeader(raw);if(parsedHeader.fromDomain&&!current){$("#domain").value=parsedHeader.fromDomain;await investigate()}else renderHeaderComparison()}
+function parseHeader(raw){const from=headerValues(raw,"From")[0]||null,ret=headerValues(raw,"Return-Path")[0]||null,received=headerValues(raw,"Received"),auth=parseAuth(raw),recText=received.join("\n");return{fromDomain:emailDomain(from)||auth.headerFrom,returnDomain:emailDomain(ret)||domainFromToken(auth.mailfrom),receivedCount:received.length,publicIPs:publicIPs(recText),observedProvider:sendingProvider(recText+" "+ret+" "+auth.raw),auth}}
+async function analyzeHeader(){const raw=$("#headerText").value;if(!raw.trim())return alert(LANG==="ko"?"헤더를 붙여넣거나 파일을 올리세요.":"Paste or upload a header first.");parsedHeader=parseHeader(raw);if(parsedHeader.fromDomain&&!current){$("#domain").value=parsedHeader.fromDomain;await investigate()}else renderHeaderComparison()}
 function renderHeaderComparison(){
- if(!parsedHeader)return;
- const h=parsedHeader,md=current?.maildns||{},fa=aligned(h.fromDomain,h.returnDomain),da=aligned(h.fromDomain,h.auth.dkimDomain),pa=providerAuthorized(md.spf,h.observedProvider);
- let html='<div class="comparegrid">'+[
-  ["From domain",h.fromDomain||"—"],["Return-Path domain",h.returnDomain||"—"],["DKIM signing domain",h.auth.dkimDomain||"—"],["Observed sending provider",h.observedProvider||"Unknown"],["Public IP(s)",h.publicIPs.slice(0,4).join(", ")||"—"],["Received hops",String(h.receivedCount)]
- ].map(([l,v])=>`<div class="comparebox"><div class="label">${esc(l)}</div><div class="value">${esc(v)}</div></div>`).join("")+'</div>';
- html+='<div class="kv" style="margin-top:14px">'+row("SPF result",h.auth.spf||"—",h.auth.spf==="pass"?"good":h.auth.spf?"warn":"info")+row("DKIM result",h.auth.dkim||"—",h.auth.dkim==="pass"?"good":h.auth.dkim?"warn":"info")+row("DMARC result",h.auth.dmarc||"—",h.auth.dmarc==="pass"||h.auth.dmarc==="bestguesspass"?"good":h.auth.dmarc?"warn":"info")+row("Current SPF record",md.spf||"Not returned")+row("Current DMARC record",md.dmarc||"Not returned")+'</div>';
- const findings=[];
- if(h.auth.dmarc==="fail")findings.push(["bad","DMARC failed","Spoofing/misalignment is more plausible; inspect the exact Authentication-Results."]);
- if(h.auth.spf==="pass"&&h.auth.dkim==="pass"&&h.auth.dmarc==="pass")findings.push(["good","Message authenticated","Simple visible-From spoofing is less likely, but authentication does not prove the account/service was uncompromised."]);
- if(fa===false)findings.push(["info","Return-Path differs from From","Common with third-party senders. Evaluate with SPF/DMARC rather than exact string equality."]);
- if(da===false)findings.push(["info","DKIM signing domain differs from From","Can be normal for delegated sending. DMARC alignment is more meaningful than exact equality."]);
- if(h.observedProvider&&pa===true)findings.push(["good",`${h.observedProvider} is visible in current SPF authorization`,"The provider is consistent with a currently authorized outbound service."]);
- if(h.observedProvider&&pa===false)findings.push(["warn",`${h.observedProvider} is not obvious in current SPF`,"A useful clue, not proof. SPF may authorize indirectly or may have changed since delivery."]);
- if(current?.dns?.MX?.length&&h.observedProvider)findings.push(["info","MX mismatch is not an anomaly by itself","MX is inbound routing. A message can legitimately leave through Mailgun/SES/Microsoft while inbound mail goes through Sophos/Proofpoint/etc."]);
- if(h.auth.spf==="pass"&&h.auth.dkim==="pass"&&h.auth.dmarc==="pass"&&h.observedProvider&&pa!==false)findings.push(["warn","If the content is malicious, investigate authorized-infrastructure abuse","Possible hypotheses include compromised mailbox, compromised SaaS/API credentials, or abuse of a legitimate sending account. This is not confirmation."]);
- html+='<div style="margin-top:14px">'+findings.map(([c,t,b])=>`<div class="flag"><div class="flag-title ${c}-text">${esc(t)}</div><div class="muted">${esc(b)}</div></div>`).join("")+'</div>';
- $("#headerResult").innerHTML=html;
+ const h=parsedHeader;if(!h)return;const m=current?.maildns||{};
+ const boxes=[[T("fromDomain"),h.fromDomain||"—"],[T("returnDomain"),h.returnDomain||"—"],[T("dkimDomain"),h.auth.dkimDomain||"—"],[T("observedProvider"),h.observedProvider||"—"],[T("publicIPs"),h.publicIPs.slice(0,4).join(", ")||"—"],[T("receivedHops"),String(h.receivedCount)]];
+ let html=`<div class="comparegrid">${boxes.map(([l,v])=>`<div class="compare"><div class="label">${esc(l)}</div><div class="value">${esc(v)}</div></div>`).join("")}</div>`;
+ html+=`<div class="kv" style="margin-top:12px">${kvRow(T("spfResult"),h.auth.spf||"—",h.auth.spf==="pass"?"good":"info")}${kvRow(T("dkimResult"),h.auth.dkim||"—",h.auth.dkim==="pass"?"good":"info")}${kvRow(T("dmarcResult"),h.auth.dmarc||"—",h.auth.dmarc==="pass"?"good":"info")}${kvRow(T("currentSPF"),m.spf||"—")}${kvRow(T("currentDMARC"),m.dmarc||"—")}</div>`;
+ const notes=[];if(h.auth.dmarc==="fail")notes.push(["bad",T("authFail"),LANG==="ko"?"스푸핑 또는 alignment 실패 가능성을 확인하세요.":"Check spoofing or alignment failure."]);
+ if(h.auth.spf==="pass"&&h.auth.dkim==="pass"&&h.auth.dmarc==="pass")notes.push(["good",T("authPass"),LANG==="ko"?"단순 From 스푸핑 가능성은 낮아집니다.":"Simple visible-From spoofing is less likely."]);
+ if(current?.dns?.MX?.length&&h.observedProvider)notes.push(["info",T("mxNotOutbound"),T("meaningMX")]);
+ if(h.auth.spf==="pass"&&h.auth.dkim==="pass"&&h.auth.dmarc==="pass"&&h.observedProvider)notes.push(["warn",LANG==="ko"?"악성이라면 승인된 인프라 악용 확인":"If malicious, investigate authorized-infrastructure abuse",T("authAbuse")]);
+ html+=notes.map(([c,t,b])=>`<div class="notice ${c}" style="margin-top:9px"><b>${esc(t)}</b><p>${esc(b)}</p></div>`).join("");
+ $("#headerResult").innerHTML=html;renderQuickSummary();
 }
-
-$("#headerFile").onchange=async e=>{const f=e.target.files?.[0];if(f)$("#headerText").value=await f.text()};
-$("#parseHeader").onclick=analyzeHeader;
-$("#useFrom").onclick=()=>{if(!parsedHeader)return alert("Analyze a header first.");if(!parsedHeader.fromDomain)return alert("No From domain parsed.");$("#domain").value=parsedHeader.fromDomain;investigate()};
 
 function domain(){return current?.domain||clean($("#domain").value)}
-function openUrl(kind){const d=domain();if(!d)return alert("Enter a domain first.");const urls={talos:"https://www.talosintelligence.com/reputation_center",vt:"https://www.virustotal.com/gui/domain/"+encodeURIComponent(d),dt:"https://whois.domaintools.com/"+encodeURIComponent(d),st:"https://securitytrails.com/domain/"+encodeURIComponent(d)+"/history",wb:"https://web.archive.org/web/*/"+encodeURIComponent(d)+"/*"};window.open(urls[kind],"_blank","noopener")}
-async function ct(){const d=domain();if(!d)return alert("Enter a domain first.");$("#ctResult").textContent="Trying public CT lookup…";try{const x=await api("/api/ct?domain="+encodeURIComponent(d));$("#ctResult").innerHTML=`CT returned ${x.unique_certificates} certificate record(s), ${x.unique_names} hostname(s). Newest observed: ${esc(fmt(x.newest))}.`}catch(e){$("#ctResult").innerHTML=`<span class="muted">CT unavailable (${esc(e.message)}). This does not affect the primary assessment.</span>`}}
-function storageKey(){return"domainBackstory:"+domain()}function loadSaved(){const x=JSON.parse(localStorage.getItem(storageKey())||"null");if(x){$("#disp").value=x.disp;$("#notes").value=x.notes}else{$("#disp").value="No disposition yet";$("#notes").value=""}}
-function summaryText(){const r=current?.rdap||{},d=current?.dns||{},m=current?.maildns||{},h=parsedHeader||{};return`Domain: ${domain()}\nCurrent registration created: ${fmt(r.created)}\nDomain changed: ${fmt(r.changed)}\nRegistrar: ${r.registrar||"—"}\nNameservers: ${(r.nameservers||[]).join(", ")||"—"}\nInbound MX: ${(d.MX||[]).join(", ")||"—"}\nSPF: ${m.spf||"—"}\nHeader From domain: ${h.fromDomain||"—"}\nObserved provider: ${h.observedProvider||"—"}\nSPF/DKIM/DMARC: ${h.auth?`${h.auth.spf||"—"} / ${h.auth.dkim||"—"} / ${h.auth.dmarc||"—"}`:"—"}\nDisposition: ${$("#disp").value}\nNotes: ${$("#notes").value}`}
-$("#go").onclick=investigate;$("#domain").onkeydown=e=>{if(e.key==="Enter")investigate()};$("#talosBtn").onclick=()=>openUrl("talos");$("#vtBtn").onclick=()=>openUrl("vt");$("#dtBtn").onclick=()=>openUrl("dt");$("#stBtn").onclick=()=>openUrl("st");$("#wbBtn").onclick=()=>openUrl("wb");$("#ctBtn").onclick=ct;
-$("#save").onclick=()=>{localStorage.setItem(storageKey(),JSON.stringify({disp:$("#disp").value,notes:$("#notes").value}));$("#saved").textContent=" Saved in this browser."};
-$("#copy").onclick=async()=>{if(!current&&!parsedHeader)return alert("Investigate a domain or analyze a header first.");await navigator.clipboard.writeText(summaryText());$("#saved").textContent=" Summary copied."};
+function openUrl(kind){const d=domain();if(!d)return;const urls={talos:"https://www.talosintelligence.com/reputation_center",vt:"https://www.virustotal.com/gui/domain/"+encodeURIComponent(d),dt:"https://whois.domaintools.com/"+encodeURIComponent(d),st:"https://securitytrails.com/domain/"+encodeURIComponent(d)+"/history",wb:"https://web.archive.org/web/*/"+encodeURIComponent(d)+"/*"};window.open(urls[kind],"_blank","noopener")}
+async function ct(){const d=domain();if(!d)return;$("#ctResult").textContent=T("loading");try{const x=await api("/api/ct?domain="+encodeURIComponent(d));$("#ctResult").textContent=LANG==="ko"?`CT 결과: 인증서 ${x.unique_certificates}개, 호스트명 ${x.unique_names}개, 최근 관찰 ${fmt(x.newest)}`:`CT: ${x.unique_certificates} certs, ${x.unique_names} hostnames, newest ${fmt(x.newest)}`}catch(e){$("#ctResult").textContent=LANG==="ko"?"CT 조회 불가 — 핵심 판정에는 영향 없음":"CT unavailable — does not affect the primary assessment"}}
+function storageKey(){return"domainBackstory:"+domain()}
+function loadSaved(){const x=JSON.parse(localStorage.getItem(storageKey())||"null");if(x){$("#disp").selectedIndex=x.dispIndex??0;$("#notes").value=x.notes||""}}
+function saveLocal(){localStorage.setItem(storageKey(),JSON.stringify({dispIndex:$("#disp").selectedIndex,notes:$("#notes").value}));$("#saved").textContent=LANG==="ko"?"이 브라우저에 저장됨":"Saved in this browser"}
+function summaryText(){const r=current?.rdap||{},d=current?.dns||{},m=current?.maildns||{},h=parsedHeader||{};return `Domain: ${domain()}\nCreated: ${fmt(r.created)}\nChanged: ${fmt(r.changed)}\nRegistrar: ${r.registrar||"—"}\nMX: ${(d.MX||[]).join(", ")||"—"}\nSPF: ${m.spf||"—"}\nObserved provider: ${h.observedProvider||"—"}\nSPF/DKIM/DMARC: ${h.auth?`${h.auth.spf||"—"} / ${h.auth.dkim||"—"} / ${h.auth.dmarc||"—"}`:"—"}\nNotes: ${$("#notes").value}`}
 
-const topBtn=$("#topBtn");
-window.addEventListener("scroll",()=>{ if(window.scrollY>600) topBtn.classList.add("show"); else topBtn.classList.remove("show"); });
-topBtn.onclick=()=>window.scrollTo({top:0,behavior:"smooth"});
-$("#langKo").onclick=()=>setLang("ko");$("#langEn").onclick=()=>setLang("en");setLang(LANG);
-$("#bottomTopBtn").onclick=()=>window.scrollTo({top:0,behavior:"smooth"});
-
-</script></body></html>
+$("#go").onclick=investigate;$("#domain").onkeydown=e=>{if(e.key==="Enter")investigate()};
+$("#langKo").onclick=()=>setLanguage("ko");$("#langEn").onclick=()=>setLanguage("en");
+$("#headerFile").onchange=async e=>{const f=e.target.files?.[0];if(f)$("#headerText").value=await f.text()};
+$("#parseHeader").onclick=analyzeHeader;$("#useFrom").onclick=()=>{if(parsedHeader?.fromDomain){$("#domain").value=parsedHeader.fromDomain;investigate()}};
+$("#vtBtn").onclick=()=>openUrl("vt");$("#talosBtn").onclick=()=>openUrl("talos");$("#dtBtn").onclick=()=>openUrl("dt");$("#stBtn").onclick=()=>openUrl("st");$("#wbBtn").onclick=()=>openUrl("wb");$("#ctBtn").onclick=ct;
+$("#save").onclick=saveLocal;$("#copy").onclick=async()=>{await navigator.clipboard.writeText(summaryText());$("#saved").textContent=LANG==="ko"?"요약 복사됨":"Summary copied"};
+$("#bottomTopBtn").onclick=()=>window.scrollTo({top:0,behavior:"smooth"});$("#floatTop").onclick=()=>window.scrollTo({top:0,behavior:"smooth"});
+window.addEventListener("scroll",()=>$("#floatTop").classList.toggle("show",window.scrollY>650));
+setLanguage(LANG);
+</script>
+</body>
+</html>
