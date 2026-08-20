@@ -50,10 +50,6 @@ h2{font-size:14px;letter-spacing:.09em;text-transform:uppercase;color:#d8d2ef;ma
 .timeline{display:flex;gap:10px;overflow-x:auto;padding:4px 0}
 .event{min-width:190px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}
 .event .date{font-size:12px;color:var(--muted);margin-bottom:6px}
-.dnsgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.dnsbox{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}
-.dnsbox b{display:block;margin-bottom:6px}
-.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;overflow-wrap:anywhere;color:#ddd8ef}
 .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .deepRow{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
 .deepRow:last-child{border-bottom:0}.deepRow .why{max-width:720px}
@@ -70,20 +66,31 @@ textarea{min-height:105px}
 .comparegrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .comparebox{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}
 .comparebox .label{color:var(--muted);font-size:12px;margin-bottom:5px}.comparebox .value{font-weight:750;overflow-wrap:anywhere}
-@media(max-width:900px){.lifecycle,.comparegrid{grid-template-columns:1fr 1fr}}
-@media(max-width:780px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.dnsgrid,.comparegrid{grid-template-columns:1fr}.notes{grid-template-columns:1fr}.hero{display:block}.badge{display:inline-block;margin-top:10px}.search{flex-wrap:wrap}.search input{min-width:100%}.lifecycle{grid-template-columns:1fr}}
+.infra{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.infrabox{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:13px}
+.infrabox .label{font-size:12px;color:var(--muted);margin-bottom:6px}
+.infrabox .value{font-weight:800;line-height:1.4;overflow-wrap:anywhere}
+.infrabox .meaning{font-size:12px;color:var(--muted);margin-top:7px;line-height:1.45}
+details{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+summary{cursor:pointer;color:#c9baff;font-weight:700}
+.rawdns{margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rawbox{background:#111119;border:1px solid var(--line);border-radius:10px;padding:10px}
+.rawbox b{display:block;margin-bottom:5px}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;overflow-wrap:anywhere;color:#ddd8ef}
+@media(max-width:900px){.lifecycle,.comparegrid,.infra{grid-template-columns:1fr 1fr}}
+@media(max-width:780px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.comparegrid,.infra,.rawdns{grid-template-columns:1fr}.notes{grid-template-columns:1fr}.hero{display:block}.badge{display:inline-block;margin-top:10px}.search{flex-wrap:wrap}.search input{min-width:100%}.lifecycle{grid-template-columns:1fr}}
 </style>
 </head>
 <body><div class="wrap">
 <div class="hero">
- <div><h1>Domain Backstory</h1><div class="sub">Sender-domain triage plus optional email-header analysis. Domain context comes from public data; pasted/uploaded headers are parsed locally in your browser.</div></div>
- <div class="badge">RDAP · DNS · Header analysis · Reputation pivots</div>
+ <div><h1>Domain Backstory</h1><div class="sub">Sender-domain triage plus optional email-header analysis. The main view explains what the infrastructure means; raw DNS stays available underneath.</div></div>
+ <div class="badge">RDAP · Infrastructure · Headers · Reputation pivots</div>
 </div>
 
 <div class="search"><input type="text" id="domain" placeholder="example.com or paste an email / URL"><button id="go">Investigate</button></div>
 <div class="statusrow">
  <span id="s-rdap" class="status wait">Registration: waiting</span>
- <span id="s-dns" class="status wait">DNS: waiting</span>
+ <span id="s-dns" class="status wait">Infrastructure: waiting</span>
  <span id="s-wb" class="status wait">Wayback: waiting</span>
 </div>
 
@@ -102,7 +109,6 @@ textarea{min-height:105px}
  <section class="card full">
   <h2>Lifecycle / possible re-registration</h2>
   <div id="lifecycle" class="muted">Waiting…</div>
-  <div class="callout muted"><b>Important:</b> free RDAP cannot enumerate every past registration cycle. Earlier archived-web evidence can support an earlier-lifecycle hypothesis, but exact re-registration counts require historical WHOIS/passive DNS.</div>
  </section>
 
  <section class="card full">
@@ -111,8 +117,8 @@ textarea{min-height:105px}
  </section>
 
  <section class="card">
-  <h2>Current DNS footprint</h2>
-  <div id="dns" class="muted">Waiting…</div>
+  <h2>Current infrastructure</h2>
+  <div id="infra" class="muted">Waiting…</div>
  </section>
 
  <section class="card">
@@ -122,7 +128,7 @@ textarea{min-height:105px}
 
  <section class="card full">
   <h2>Email header analyzer</h2>
-  <div class="muted" style="margin-bottom:10px">Paste a Defender-copied raw header or upload a plain-text <b>.txt/.eml</b> file. Parsing happens <b>only in this browser</b>; the raw header is not sent to the Worker. Review your organization's data-handling rules before using production headers.</div>
+  <div class="muted" style="margin-bottom:10px">Paste a Defender-copied raw header or upload a plain-text <b>.txt/.eml</b> file. Parsing happens only in your browser; the raw header is not sent to the Worker.</div>
   <div class="fileRow"><input id="headerFile" type="file" accept=".txt,.eml,text/plain,message/rfc822"><button class="secondary" id="parseHeader">Analyze header</button><button class="ghost" id="useFrom">Use From domain</button></div>
   <textarea id="headerText" placeholder="Paste raw Internet headers here..."></textarea>
   <div id="headerResult" class="muted" style="margin-top:14px">No header analyzed yet.</div>
@@ -150,6 +156,7 @@ textarea{min-height:105px}
 
 <script>
 const $=s=>document.querySelector(s); let current=null, parsedHeader=null;
+
 function clean(x){x=(x||"").trim().toLowerCase();if(x.includes("@")&&!x.includes("://"))x=x.split("@").pop();try{if(x.includes("://"))x=new URL(x).hostname}catch{}return x.split("/")[0].split(":")[0].replace(/^\.+|\.+$/g,"")}
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
 function fmt(x){if(!x)return"—";const d=new Date(x);return isNaN(d)?String(x):d.toLocaleDateString()}
@@ -162,25 +169,70 @@ function status(id,state,text){const e=$("#"+id);e.className="status "+state;e.t
 function cDate(d,type){const n=type==="expiry"?until(d):ago(d);if(n===null)return"info";if(type==="created"){if(n<90)return"bad";if(n<365)return"warn";if(n>1825)return"good"}if(type==="changed"){if(n<30)return"warn";if(n<90)return"info"}if(type==="expiry"){if(n<30)return"bad";if(n<90)return"warn"}return"info"}
 function row(k,v,c=""){return`<div class="k">${esc(k)}</div><div class="v">${c?`<span class="hl ${c}">${esc(v??"—")}</span>`:esc(v??"—")}</div>`}
 
+function providerFromHostnames(items){
+ const s=(items||[]).join(" ").toLowerCase();
+ const rules=[
+  ["Sophos",["hydra.sophos.com","sophos.com"]],
+  ["Microsoft 365",["protection.outlook.com","outlook.com"]],
+  ["Google Workspace",["google.com","googlemail.com"]],
+  ["Proofpoint",["pphosted.com","proofpoint"]],
+  ["Mimecast",["mimecast.com"]],
+  ["Barracuda",["barracudanetworks.com","barracuda"]],
+  ["Cloudflare",["cloudflare.com"]]
+ ];
+ for(const [n,needles] of rules)if(needles.some(x=>s.includes(x)))return n;return null;
+}
+function spfProviders(spf){
+ const s=String(spf||"").toLowerCase(),out=[];
+ const rules=[
+  ["Microsoft 365",["spf.protection.outlook.com"]],
+  ["Google Workspace",["_spf.google.com"]],
+  ["Mailgun",["mailgun"]],
+  ["SendGrid",["sendgrid"]],
+  ["Amazon SES",["amazonses"]],
+  ["Mandrill",["mandrill"]],
+  ["Proofpoint",["pphosted"]],
+  ["Sophos",["sophos"]],
+  ["Mimecast",["mimecast"]]
+ ];
+ for(const [n,needles] of rules)if(needles.some(x=>s.includes(x)))out.push(n);
+ return out;
+}
+
 async function investigate(){
  const d=clean($("#domain").value);if(!d||!d.includes("."))return alert("Enter a valid domain.");
  $("#domain").value=d;current={domain:d,rdap:null,dns:null,wb:null,maildns:null,errors:{}};
- ["rdap","dns","wb","timeline","lifecycle"].forEach(id=>$("#"+id).textContent="Looking up…");$("#signal").textContent="Building context…";$("#flags").innerHTML="";$("#ctResult").textContent="";
- status("s-rdap","wait","Registration: loading");status("s-dns","wait","DNS: loading");status("s-wb","wait","Wayback: loading");
+ ["rdap","infra","wb","timeline","lifecycle"].forEach(id=>$("#"+id).textContent="Looking up…");$("#signal").textContent="Building context…";$("#flags").innerHTML="";$("#ctResult").textContent="";
+ status("s-rdap","wait","Registration: loading");status("s-dns","wait","Infrastructure: loading");status("s-wb","wait","Wayback: loading");
  const jobs=[
   api("/api/rdap?domain="+encodeURIComponent(d)).then(x=>{current.rdap=x;renderRDAP(x);status("s-rdap","ok",x.cached?"Registration: OK · cached":"Registration: OK")}).catch(e=>{current.errors.rdap=e.message;$("#rdap").innerHTML=`<span class="bad-text">LOOKUP FAILED: ${esc(e.message)}</span>`;status("s-rdap","fail","Registration: failed")}),
-  api("/api/dns?domain="+encodeURIComponent(d)).then(x=>{current.dns=x;renderDNS(x);status("s-dns","ok",x.cached?"DNS: OK · cached":"DNS: OK")}).catch(e=>{current.errors.dns=e.message;$("#dns").innerHTML=`<span class="bad-text">LOOKUP FAILED: ${esc(e.message)}</span>`;status("s-dns","fail","DNS: failed")}),
-  api("/api/wayback?domain="+encodeURIComponent(d)).then(x=>{current.wb=x;renderWB(x);status("s-wb","ok",x.cached?"Wayback: OK · cached":"Wayback: OK")}).catch(e=>{current.errors.wb=e.message;$("#wb").innerHTML=`<span class="muted">Wayback unavailable: ${esc(e.message)}</span>`;status("s-wb","fail","Wayback: unavailable")}),
-  api("/api/maildns?domain="+encodeURIComponent(d)).then(x=>{current.maildns=x}).catch(()=>{})
+  api("/api/dns?domain="+encodeURIComponent(d)).then(x=>{current.dns=x;renderInfrastructure();status("s-dns","ok",x.cached?"Infrastructure: OK · cached":"Infrastructure: OK")}).catch(e=>{current.errors.dns=e.message;$("#infra").innerHTML=`<span class="bad-text">LOOKUP FAILED: ${esc(e.message)}</span>`;status("s-dns","fail","Infrastructure: failed")}),
+  api("/api/maildns?domain="+encodeURIComponent(d)).then(x=>{current.maildns=x;renderInfrastructure()}).catch(()=>{}),
+  api("/api/wayback?domain="+encodeURIComponent(d)).then(x=>{current.wb=x;renderWB(x);status("s-wb","ok",x.cached?"Wayback: OK · cached":"Wayback: OK")}).catch(e=>{current.errors.wb=e.message;$("#wb").innerHTML=`<span class="muted">Wayback unavailable: ${esc(e.message)}</span>`;status("s-wb","fail","Wayback: unavailable")})
  ];
  await Promise.allSettled(jobs);renderSignal();renderLifecycle();renderTimeline();loadSaved();if(parsedHeader)renderHeaderComparison();
 }
+
 function renderRDAP(x){
- let h='<div class="kv">'+row("Current registration created",fmt(x.created),cDate(x.created,"created"))+row("Domain record changed",fmt(x.changed),cDate(x.changed,"changed"))+row("Last registrar transfer",fmt(x.transfer),x.transfer?"info":"")+row("Registry expires",fmt(x.expires),cDate(x.expires,"expiry"))+row("Registrar expires",fmt(x.registrar_expires),cDate(x.registrar_expires,"expiry"))+row("RDAP DB updated",fmt(x.rdap_db_updated))+row("Current registration age",x.created?ageText(x.created):"—",x.created&&ago(x.created)>1825?"good":"info")+row("Registrar",x.registrar||"—")+row("Registrar IANA ID",x.registrar_iana_id||"—")+row("Nameservers",(x.nameservers||[]).join(", ")||"—")+row("Domain status",(x.status||[]).join(", ")||"—")+'</div><div class="callout muted">Current creation date is not guaranteed to be first-ever registration. Historical WHOIS is required to enumerate older registration epochs.</div>';
- $("#rdap").innerHTML=h;
+ $("#rdap").innerHTML='<div class="kv">'+row("Current registration created",fmt(x.created),cDate(x.created,"created"))+row("Domain record changed",fmt(x.changed),cDate(x.changed,"changed"))+row("Last registrar transfer",fmt(x.transfer),x.transfer?"info":"")+row("Registry expires",fmt(x.expires),cDate(x.expires,"expiry"))+row("Registrar expires",fmt(x.registrar_expires),cDate(x.registrar_expires,"expiry"))+row("Current registration age",x.created?ageText(x.created):"—",x.created&&ago(x.created)>1825?"good":"info")+row("Registrar",x.registrar||"—")+row("Registrar IANA ID",x.registrar_iana_id||"—")+row("Nameservers",(x.nameservers||[]).join(", ")||"—")+'</div><div class="callout muted">Current creation date is not guaranteed to be first-ever registration. Historical WHOIS is needed to enumerate earlier registration epochs.</div>';
 }
-function dnsBox(title,vals){const a=vals||[];return`<div class="dnsbox"><b>${esc(title)}</b>${a.length?a.map(v=>`<div class="mono">${esc(v)}</div>`).join(""):'<div class="muted">None returned</div>'}</div>`}
-function renderDNS(x){$("#dns").innerHTML='<div class="dnsgrid">'+dnsBox("A",x.A)+dnsBox("AAAA",x.AAAA)+dnsBox("MX",x.MX)+dnsBox("NS",x.NS)+dnsBox("CNAME",x.CNAME)+dnsBox("SOA",x.SOA)+'</div><div class="muted" style="margin-top:10px"><b>MX is inbound routing.</b> Do not treat a mismatch between MX and a message’s sending provider as suspicious by itself.</div>'}
+function rawBox(title,vals){const a=vals||[];return`<div class="rawbox"><b>${esc(title)}</b>${a.length?a.map(v=>`<div class="mono">${esc(v)}</div>`).join(""):'<div class="muted">None returned</div>'}</div>`}
+function renderInfrastructure(){
+ const d=current?.dns||{},m=current?.maildns||{};
+ const inbound=providerFromHostnames(d.MX)||"Provider not recognized";
+ const dnsProvider=providerFromHostnames(d.NS)||((d.NS||[]).length?"Custom / other DNS provider":"Unknown");
+ const web=(d.A||[]).length?d.A.join(", "):(d.CNAME||[]).length?d.CNAME.join(", "):"No A/CNAME returned";
+ const outbound=spfProviders(m.spf);
+ let h='<div class="infra">';
+ h+=`<div class="infrabox"><div class="label">Web / host destination</div><div class="value">${esc(web)}</div><div class="meaning">Where the root domain currently resolves. Useful as an IP/hosting pivot, not a reputation verdict.</div></div>`;
+ h+=`<div class="infrabox"><div class="label">Inbound email gateway</div><div class="value">${esc(inbound)}</div><div class="meaning">${esc((d.MX||[]).slice(0,2).join(" · ")||"No MX returned")}<br><b>MX describes incoming mail routing, not the provider that sent a specific message.</b></div></div>`;
+ h+=`<div class="infrabox"><div class="label">Authorized outbound clues (SPF)</div><div class="value">${esc(outbound.length?outbound.join(", "):m.spf?"No common provider recognized":"SPF not returned")}</div><div class="meaning">${esc(m.spf||"No SPF record returned")}</div></div>`;
+ h+=`<div class="infrabox"><div class="label">DNS management</div><div class="value">${esc(dnsProvider)}</div><div class="meaning">${esc((d.NS||[]).join(" · ")||"No NS returned")}<br>Historical NS changes can be more useful than the current value alone.</div></div>`;
+ h+='</div>';
+ if(m.dmarc)h+=`<div class="callout muted"><b>DMARC:</b> ${esc(m.dmarc)}</div>`;
+ h+='<details><summary>Show raw DNS records</summary><div class="rawdns">'+rawBox("A",d.A)+rawBox("AAAA",d.AAAA)+rawBox("MX",d.MX)+rawBox("NS",d.NS)+rawBox("CNAME",d.CNAME)+rawBox("SOA",d.SOA)+'</div></details>';
+ $("#infra").innerHTML=h;
+}
 function renderWB(x){
  const o=x.oldest,l=x.latest;let h='<div class="kv">'+row("Oldest snapshot returned",fmt(o?.timestamp),o?.available?"good":"info")+row("Latest snapshot returned",fmt(l?.timestamp))+row("Old archived page",o?.available?"Found":"Not returned",o?.available?"good":"info")+'</div>';
  if(o?.url)h+=`<div style="margin-top:10px"><a target="_blank" href="${esc(o.url)}">View older archived copy</a></div>`;if(l?.url)h+=`<div style="margin-top:6px"><a target="_blank" href="${esc(l.url)}">View latest archived copy</a></div>`;
@@ -190,97 +242,70 @@ function priorLifecycle(){const r=current?.rdap,w=current?.wb;if(!r?.created||!w
 function renderLifecycle(){
  const r=current.rdap,p=priorLifecycle();let pv=p.state==="yes"?"YES — archived web predates current registration":p.state==="no"?"No evidence from lightweight archive check":"Unknown";
  $("#lifecycle").innerHTML=`<div class="lifecycle"><div class="lifeBox"><div class="label">Current registration started</div><div class="value">${esc(fmt(r?.created))}</div></div><div class="lifeBox"><div class="label">Last registrar transfer</div><div class="value">${esc(r?.transfer?fmt(r.transfer):"Not reported")}</div></div><div class="lifeBox"><div class="label">Earlier web-lifecycle evidence</div><div class="value">${esc(pv)}</div></div></div>`;
- if(p.state==="yes")$("#lifecycle").innerHTML+=`<div class="signal warn" style="margin-top:12px"><div class="big">Possible re-registration / repurposing clue</div><div class="muted">Archived web evidence predates the current registration by about ${(p.gap/365.25).toFixed(1)} years. Verify with historical WHOIS/passive DNS; this does not prove malicious re-registration.</div></div>`;
+ if(p.state==="yes")$("#lifecycle").innerHTML+=`<div class="signal warn" style="margin-top:12px"><div class="big">Possible re-registration / repurposing clue</div><div class="muted">Archived web evidence predates current registration by about ${(p.gap/365.25).toFixed(1)} years. Verify with historical WHOIS/passive DNS.</div></div>`;
  $("#lifecycle").innerHTML+=`<div class="kv" style="margin-top:14px">${row("Exact re-registration count","Not determinable from free RDAP")}${row("Inactive gap length","Not determinable without historical registration/DNS data")}${row("Best verification","Historical WHOIS / passive DNS")}</div>`;
 }
 function renderSignal(){
  const r=current.rdap,d=current.dns,p=priorLifecycle();const positive=[],attention=[];
- if(r?.created){const n=ago(r.created);if(n<90)attention.push(["bad","Recently registered",`Current registration started ${n} days ago.`]);else if(n<365)attention.push(["warn","Young current registration",`Current registration is under one year old.`]);else if(n>1825)positive.push(["good","Long-established current registration",`Current lifecycle is about ${Math.floor(n/365.25)} years old.`])}
+ if(r?.created){const n=ago(r.created);if(n<90)attention.push(["bad","Recently registered",`Current registration started ${n} days ago.`]);else if(n<365)attention.push(["warn","Young current registration","Current registration is under one year old."]);else if(n>1825)positive.push(["good","Long-established current registration",`Current lifecycle is about ${Math.floor(n/365.25)} years old.`])}
  if(r?.changed&&ago(r.changed)>=0&&ago(r.changed)<30)attention.push(["warn","Recent registration change",`RDAP says the record changed ${ago(r.changed)} days ago; it does not identify the field.`]);
  if(r?.transfer&&ago(r.transfer)>=0&&ago(r.transfer)<90)attention.push(["warn","Recent registrar transfer",`RDAP reports a registrar transfer ${ago(r.transfer)} days ago.`]);
  if(p.state==="yes")attention.push(["warn","Earlier lifecycle evidence",`Archived web content predates current registration by about ${(p.gap/365.25).toFixed(1)} years.`]);
  let cls="info",title="Domain context retrieved";
  if(attention.some(x=>x[0]==="bad")){cls="bad";title="Strong lifecycle clue — investigate further"}else if(attention.length){cls="warn";title="Established context with changes worth reviewing"}else if(positive.length){cls="good";title="Established current registration context"}
- $("#signal").innerHTML=`<div class="signal ${cls}"><div class="big">${esc(title)}</div><div class="muted">Signals are shown independently; an old domain does not cancel out a recent change.</div></div>`;
- const f=[...attention,...positive];if(d?.MX?.length)f.push(["info","Inbound mail routing",`MX: ${d.MX.slice(0,2).join(" · ")}. MX does not identify the outbound provider used by a specific message.`]);if(!f.length)f.push(["info","No major lifecycle flag","Use reputation, message behavior, and internal telemetry next."]);
+ $("#signal").innerHTML=`<div class="signal ${cls}"><div class="big">${esc(title)}</div><div class="muted">Signals are independent; an old domain does not cancel a recent registration change.</div></div>`;
+ const f=[...attention,...positive];
+ if(current?.maildns?.spf){const ps=spfProviders(current.maildns.spf);f.push(["info","Outbound authorization clues",ps.length?`SPF references: ${ps.join(", ")}`:"SPF exists, but no common provider was recognized."])}
+ if(d?.MX?.length)f.push(["info","Inbound mail routing",`MX: ${d.MX.slice(0,2).join(" · ")}. This does not identify the outbound provider used by a specific message.`]);
+ if(!f.length)f.push(["info","No major lifecycle flag","Use reputation, message behavior, and internal telemetry next."]);
  $("#flags").innerHTML=f.map(([c,t,b])=>`<div class="flag"><div class="flag-title ${c}-text">${esc(t)}</div><div class="muted">${esc(b)}</div></div>`).join("");
 }
-function renderTimeline(){const r=current.rdap,w=current.wb,e=[];if(w?.oldest?.timestamp)e.push([w.oldest.timestamp,"Old archived web copy"]);if(r?.created)e.push([r.created,"Current registration created"]);if(r?.transfer)e.push([r.transfer,"Registrar transfer"]);if(r?.changed)e.push([r.changed,"Domain record changed"]);if(r?.rdap_db_updated)e.push([r.rdap_db_updated,"RDAP database updated"]);if(r?.expires)e.push([r.expires,"Registry expiration"]);e.sort((a,b)=>new Date(a[0])-new Date(b[0]));$("#timeline").innerHTML=e.length?'<div class="timeline">'+e.map(([d,t])=>`<div class="event"><div class="date">${esc(fmt(d))}</div><b>${esc(t)}</b></div>`).join("")+'</div>':'<span class="muted">No timeline data returned.</span>'}
+function renderTimeline(){const r=current.rdap,w=current.wb,e=[];if(w?.oldest?.timestamp)e.push([w.oldest.timestamp,"Old archived web copy"]);if(r?.created)e.push([r.created,"Current registration created"]);if(r?.transfer)e.push([r.transfer,"Registrar transfer"]);if(r?.changed)e.push([r.changed,"Domain record changed"]);if(r?.expires)e.push([r.expires,"Registry expiration"]);e.sort((a,b)=>new Date(a[0])-new Date(b[0]));$("#timeline").innerHTML=e.length?'<div class="timeline">'+e.map(([d,t])=>`<div class="event"><div class="date">${esc(fmt(d))}</div><b>${esc(t)}</b></div>`).join("")+'</div>':'<span class="muted">No timeline data returned.</span>'}
 
-/* ---------- Header parser: browser only ---------- */
+/* Header analyzer */
 function unfold(raw){return raw.replace(/\r?\n[ \t]+/g," ")}
-function headerValues(raw,name){
- const u=unfold(raw), re=new RegExp("^"+name.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+":\\s*(.*)$","gmi");let m,a=[];while((m=re.exec(u)))a.push(m[1].trim());return a;
-}
+function headerValues(raw,name){const u=unfold(raw),re=new RegExp("^"+name.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+":\\s*(.*)$","gmi");let m,a=[];while((m=re.exec(u)))a.push(m[1].trim());return a}
 function emailDomain(s){const m=String(s||"").match(/@([A-Za-z0-9.-]+\.[A-Za-z]{2,})/);return m?m[1].toLowerCase():null}
-function domainFromAngleOrToken(s){return emailDomain(s)||(String(s||"").match(/\b(?:[a-z0-9-]+\.)+[a-z]{2,}\b/i)?.[0]?.toLowerCase()||null)}
-function publicIPs(text){
- const ips=String(text||"").match(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g)||[];
- return ips.filter(ip=>{const p=ip.split(".").map(Number);return !(p[0]===10||p[0]===127||(p[0]===192&&p[1]===168)||(p[0]===172&&p[1]>=16&&p[1]<=31)||(p[0]===169&&p[1]===254))});
+function domainFromToken(s){return emailDomain(s)||(String(s||"").match(/\b(?:[a-z0-9-]+\.)+[a-z]{2,}\b/i)?.[0]?.toLowerCase()||null)}
+function publicIPs(text){const ips=String(text||"").match(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g)||[];return ips.filter(ip=>{const p=ip.split(".").map(Number);return !(p[0]===10||p[0]===127||(p[0]===192&&p[1]===168)||(p[0]===172&&p[1]>=16&&p[1]<=31)||(p[0]===169&&p[1]===254))})}
+function sendingProvider(text){
+ const s=String(text||"").toLowerCase(),rules=[["Mailgun",["mailgun"]],["SendGrid",["sendgrid"]],["Mandrill",["mandrill"]],["Amazon SES",["amazonses"]],["Microsoft 365",["outbound.protection.outlook.com","protection.outlook.com"]],["Google Workspace",["google.com","googlemail.com"]],["Proofpoint",["pphosted","proofpoint"]],["Sophos",["hydra.sophos.com","sophos.com"]],["Mimecast",["mimecast.com"]]];
+ for(const [n,needles] of rules)if(needles.some(x=>s.includes(x)))return n;return null;
 }
-function providerFrom(text){
- const s=String(text||"").toLowerCase();
- const rules=[["Mailgun",["mailgun","mailgun.org"]],["SendGrid",["sendgrid","sendgrid.net"]],["Mandrill",["mandrillapp","mandrill"]],["Amazon SES",["amazonses","amazon ses"]],["Microsoft 365",["outbound.protection.outlook.com","protection.outlook.com","microsoft.com"]],["Google Workspace",["google.com","googlemail.com","gmail.com"]],["Proofpoint",["pphosted.com","proofpoint"]],["Sophos",["hydra.sophos.com","sophos.com"]],["Mimecast",["mimecast.com"]]];
- for(const [name,needles] of rules)if(needles.some(n=>s.includes(n)))return name;return null;
-}
-function parseAuth(raw){
- const all=headerValues(raw,"Authentication-Results").join(" ; ");
- const spf=(all.match(/\bspf=(pass|fail|softfail|neutral|temperror|permerror|none)\b/i)||[])[1]||null;
- const dkim=(all.match(/\bdkim=(pass|fail|neutral|temperror|permerror|none)\b/i)||[])[1]||null;
- const dmarc=(all.match(/\bdmarc=(pass|fail|bestguesspass|none)\b/i)||[])[1]||null;
- const mailfrom=(all.match(/smtp\.mailfrom=([^\s;]+)/i)||[])[1]?.replace(/[<>]/g,"")||null;
- const headerFrom=(all.match(/header\.from=([^\s;]+)/i)||[])[1]||null;
- const dkimDomain=(all.match(/header\.d=([^\s;]+)/i)||[])[1]||null;
- return{raw:all,spf,dkim,dmarc,mailfrom,headerFrom,dkimDomain};
-}
-function parseHeader(raw){
- const from=headerValues(raw,"From")[0]||null, ret=headerValues(raw,"Return-Path")[0]||null, sender=headerValues(raw,"Sender")[0]||null;
- const received=headerValues(raw,"Received"), auth=parseAuth(raw), msgid=headerValues(raw,"Message-ID")[0]||null;
- const fromDomain=emailDomain(from)||auth.headerFrom, returnDomain=emailDomain(ret)||domainFromAngleOrToken(auth.mailfrom), senderDomain=emailDomain(sender);
- const recText=received.join("\n"), ips=publicIPs(recText), provider=providerFrom(recText+" "+ret+" "+auth.raw);
- return{from,fromDomain,returnPath:ret,returnDomain,sender,senderDomain,receivedCount:received.length,publicIPs:ips,observedProvider:provider,messageId:msgid,auth};
-}
-async function analyzeHeader(){
- const raw=$("#headerText").value;if(!raw.trim())return alert("Paste or upload a header first.");parsedHeader=parseHeader(raw);
- if(parsedHeader.fromDomain&&!current){$("#domain").value=parsedHeader.fromDomain;await investigate()}else if(parsedHeader.fromDomain&&current?.domain!==parsedHeader.fromDomain){renderHeaderComparison()}else{renderHeaderComparison()}
-}
+function parseAuth(raw){const all=headerValues(raw,"Authentication-Results").join(" ; ");return{raw:all,spf:(all.match(/\bspf=(pass|fail|softfail|neutral|temperror|permerror|none)\b/i)||[])[1]?.toLowerCase()||null,dkim:(all.match(/\bdkim=(pass|fail|neutral|temperror|permerror|none)\b/i)||[])[1]?.toLowerCase()||null,dmarc:(all.match(/\bdmarc=(pass|fail|bestguesspass|none)\b/i)||[])[1]?.toLowerCase()||null,mailfrom:(all.match(/smtp\.mailfrom=([^\s;]+)/i)||[])[1]?.replace(/[<>]/g,"")||null,headerFrom:(all.match(/header\.from=([^\s;]+)/i)||[])[1]||null,dkimDomain:(all.match(/header\.d=([^\s;]+)/i)||[])[1]||null}}
+function parseHeader(raw){const from=headerValues(raw,"From")[0]||null,ret=headerValues(raw,"Return-Path")[0]||null,sender=headerValues(raw,"Sender")[0]||null,received=headerValues(raw,"Received"),auth=parseAuth(raw);const recText=received.join("\n");return{from,fromDomain:emailDomain(from)||auth.headerFrom,returnPath:ret,returnDomain:emailDomain(ret)||domainFromToken(auth.mailfrom),sender,senderDomain:emailDomain(sender),receivedCount:received.length,publicIPs:publicIPs(recText),observedProvider:sendingProvider(recText+" "+ret+" "+auth.raw),auth}}
 function aligned(a,b){if(!a||!b)return null;a=a.toLowerCase();b=b.toLowerCase();return a===b||a.endsWith("."+b)||b.endsWith("."+a)}
-function spfMentionsProvider(spfTxt,provider){
- const s=String(spfTxt||"").toLowerCase();const map={"Mailgun":["mailgun"],"SendGrid":["sendgrid"],"Amazon SES":["amazonses","spf.amazonses"],"Microsoft 365":["spf.protection.outlook.com"],"Google Workspace":["_spf.google.com"],"Proofpoint":["pphosted"],"Sophos":["sophos"],"Mimecast":["mimecast"]};return provider&&map[provider]?map[provider].some(n=>s.includes(n)):null;
-}
+function providerAuthorized(spf,provider){if(!provider||!spf)return null;return spfProviders(spf).includes(provider)}
+async function analyzeHeader(){const raw=$("#headerText").value;if(!raw.trim())return alert("Paste or upload a header first.");parsedHeader=parseHeader(raw);if(parsedHeader.fromDomain&&!current){$("#domain").value=parsedHeader.fromDomain;await investigate()}else renderHeaderComparison()}
 function renderHeaderComparison(){
- if(!parsedHeader){$("#headerResult").textContent="No header analyzed yet.";return}
- const h=parsedHeader, base=current?.domain||h.fromDomain, md=current?.maildns||{};
- const fromAlignReturn=aligned(h.fromDomain,h.returnDomain), fromAlignDkim=aligned(h.fromDomain,h.auth.dkimDomain);
- const providerAuthorized=spfMentionsProvider(md.spf,h.observedProvider);
- const cards=[
+ if(!parsedHeader)return;
+ const h=parsedHeader,md=current?.maildns||{},fa=aligned(h.fromDomain,h.returnDomain),da=aligned(h.fromDomain,h.auth.dkimDomain),pa=providerAuthorized(md.spf,h.observedProvider);
+ let html='<div class="comparegrid">'+[
   ["From domain",h.fromDomain||"—"],["Return-Path domain",h.returnDomain||"—"],["DKIM signing domain",h.auth.dkimDomain||"—"],["Observed sending provider",h.observedProvider||"Unknown"],["Public IP(s)",h.publicIPs.slice(0,4).join(", ")||"—"],["Received hops",String(h.receivedCount)]
- ];
- let html='<div class="comparegrid">'+cards.map(([l,v])=>`<div class="comparebox"><div class="label">${esc(l)}</div><div class="value">${esc(v)}</div></div>`).join("")+'</div>';
+ ].map(([l,v])=>`<div class="comparebox"><div class="label">${esc(l)}</div><div class="value">${esc(v)}</div></div>`).join("")+'</div>';
  html+='<div class="kv" style="margin-top:14px">'+row("SPF result",h.auth.spf||"—",h.auth.spf==="pass"?"good":h.auth.spf?"warn":"info")+row("DKIM result",h.auth.dkim||"—",h.auth.dkim==="pass"?"good":h.auth.dkim?"warn":"info")+row("DMARC result",h.auth.dmarc||"—",h.auth.dmarc==="pass"||h.auth.dmarc==="bestguesspass"?"good":h.auth.dmarc?"warn":"info")+row("Current SPF record",md.spf||"Not returned")+row("Current DMARC record",md.dmarc||"Not returned")+'</div>';
-
  const findings=[];
- if(h.auth.dmarc==="fail")findings.push(["bad","DMARC failed","This supports spoofing/misalignment as a possibility; inspect Authentication-Results and alignment details."]);
- if(h.auth.spf==="pass"&&h.auth.dkim==="pass"&&(h.auth.dmarc==="pass"||h.auth.dmarc==="bestguesspass"))findings.push(["good","Message authenticated","SPF/DKIM/DMARC passed. That makes simple visible-From spoofing less likely, but does not prove the sender account/service was uncompromised."]);
- if(fromAlignReturn===false) findings.push(["info","Return-Path differs from From","This can be completely normal for third-party senders. Judge it with SPF/DMARC and the known sending provider."]);
- if(fromAlignDkim===false) findings.push(["info","DKIM signing domain differs from From","This can be normal for delegated/third-party mail. DMARC alignment is more meaningful than exact string equality."]);
- if(h.observedProvider&&providerAuthorized===true)findings.push(["good",`${h.observedProvider} appears in current SPF context`,"The observed provider looks consistent with a currently authorized outbound sender. This weakens the idea that the provider is unexpected, though credentials at that provider could still be abused."]);
- if(h.observedProvider&&providerAuthorized===false)findings.push(["warn",`${h.observedProvider} is not obvious in the current SPF record`,"This is only a clue. SPF may authorize the provider indirectly, records may have changed since delivery, or the message may authenticate another way. Verify before calling it anomalous."]);
- if(current?.dns?.MX?.length&&h.observedProvider)findings.push(["info","Do not compare the provider directly to MX","MX describes inbound routing. A message sent through Mailgun/SES/Microsoft can be legitimate even when the domain's MX points to Sophos, Proofpoint, or another inbound gateway."]);
- if(h.auth.spf==="pass"&&h.auth.dkim==="pass"&&h.auth.dmarc==="pass"&&h.observedProvider&&providerAuthorized!==false)findings.push(["warn","If the content is malicious, consider authorized-infrastructure abuse","A malicious message that passes authentication and uses expected/authorized infrastructure is more consistent with possibilities such as a compromised mailbox, compromised SaaS/API credentials, or abuse of a legitimate sending account than with simple spoofing. This is a hypothesis, not confirmation."]);
+ if(h.auth.dmarc==="fail")findings.push(["bad","DMARC failed","Spoofing/misalignment is more plausible; inspect the exact Authentication-Results."]);
+ if(h.auth.spf==="pass"&&h.auth.dkim==="pass"&&h.auth.dmarc==="pass")findings.push(["good","Message authenticated","Simple visible-From spoofing is less likely, but authentication does not prove the account/service was uncompromised."]);
+ if(fa===false)findings.push(["info","Return-Path differs from From","Common with third-party senders. Evaluate with SPF/DMARC rather than exact string equality."]);
+ if(da===false)findings.push(["info","DKIM signing domain differs from From","Can be normal for delegated sending. DMARC alignment is more meaningful than exact equality."]);
+ if(h.observedProvider&&pa===true)findings.push(["good",`${h.observedProvider} is visible in current SPF authorization`,"The provider is consistent with a currently authorized outbound service."]);
+ if(h.observedProvider&&pa===false)findings.push(["warn",`${h.observedProvider} is not obvious in current SPF`,"A useful clue, not proof. SPF may authorize indirectly or may have changed since delivery."]);
+ if(current?.dns?.MX?.length&&h.observedProvider)findings.push(["info","MX mismatch is not an anomaly by itself","MX is inbound routing. A message can legitimately leave through Mailgun/SES/Microsoft while inbound mail goes through Sophos/Proofpoint/etc."]);
+ if(h.auth.spf==="pass"&&h.auth.dkim==="pass"&&h.auth.dmarc==="pass"&&h.observedProvider&&pa!==false)findings.push(["warn","If the content is malicious, investigate authorized-infrastructure abuse","Possible hypotheses include compromised mailbox, compromised SaaS/API credentials, or abuse of a legitimate sending account. This is not confirmation."]);
  html+='<div style="margin-top:14px">'+findings.map(([c,t,b])=>`<div class="flag"><div class="flag-title ${c}-text">${esc(t)}</div><div class="muted">${esc(b)}</div></div>`).join("")+'</div>';
  $("#headerResult").innerHTML=html;
 }
-$("#headerFile").onchange=async e=>{const f=e.target.files?.[0];if(!f)return;$("#headerText").value=await f.text()};
+
+$("#headerFile").onchange=async e=>{const f=e.target.files?.[0];if(f)$("#headerText").value=await f.text()};
 $("#parseHeader").onclick=analyzeHeader;
 $("#useFrom").onclick=()=>{if(!parsedHeader)return alert("Analyze a header first.");if(!parsedHeader.fromDomain)return alert("No From domain parsed.");$("#domain").value=parsedHeader.fromDomain;investigate()};
 
-/* ---------- misc ---------- */
 function domain(){return current?.domain||clean($("#domain").value)}
 function openUrl(kind){const d=domain();if(!d)return alert("Enter a domain first.");const urls={talos:"https://www.talosintelligence.com/reputation_center",vt:"https://www.virustotal.com/gui/domain/"+encodeURIComponent(d),dt:"https://whois.domaintools.com/"+encodeURIComponent(d),st:"https://securitytrails.com/domain/"+encodeURIComponent(d)+"/history",wb:"https://web.archive.org/web/*/"+encodeURIComponent(d)+"/*"};window.open(urls[kind],"_blank","noopener")}
 async function ct(){const d=domain();if(!d)return alert("Enter a domain first.");$("#ctResult").textContent="Trying public CT lookup…";try{const x=await api("/api/ct?domain="+encodeURIComponent(d));$("#ctResult").innerHTML=`CT returned ${x.unique_certificates} certificate record(s), ${x.unique_names} hostname(s). Newest observed: ${esc(fmt(x.newest))}.`}catch(e){$("#ctResult").innerHTML=`<span class="muted">CT unavailable (${esc(e.message)}). This does not affect the primary assessment.</span>`}}
 function storageKey(){return"domainBackstory:"+domain()}function loadSaved(){const x=JSON.parse(localStorage.getItem(storageKey())||"null");if(x){$("#disp").value=x.disp;$("#notes").value=x.notes}else{$("#disp").value="No disposition yet";$("#notes").value=""}}
-function summaryText(){const r=current?.rdap||{},d=current?.dns||{},h=parsedHeader||{};return`Domain: ${domain()}\nCurrent registration created: ${fmt(r.created)}\nDomain changed: ${fmt(r.changed)}\nLast registrar transfer: ${fmt(r.transfer)}\nRegistrar: ${r.registrar||"—"}\nNameservers: ${(r.nameservers||[]).join(", ")||"—"}\nMX: ${(d.MX||[]).join(", ")||"—"}\nHeader From domain: ${h.fromDomain||"—"}\nHeader Return-Path domain: ${h.returnDomain||"—"}\nObserved provider: ${h.observedProvider||"—"}\nSPF/DKIM/DMARC: ${h.auth?`${h.auth.spf||"—"} / ${h.auth.dkim||"—"} / ${h.auth.dmarc||"—"}`:"—"}\nDisposition: ${$("#disp").value}\nNotes: ${$("#notes").value}`}
+function summaryText(){const r=current?.rdap||{},d=current?.dns||{},m=current?.maildns||{},h=parsedHeader||{};return`Domain: ${domain()}\nCurrent registration created: ${fmt(r.created)}\nDomain changed: ${fmt(r.changed)}\nRegistrar: ${r.registrar||"—"}\nNameservers: ${(r.nameservers||[]).join(", ")||"—"}\nInbound MX: ${(d.MX||[]).join(", ")||"—"}\nSPF: ${m.spf||"—"}\nHeader From domain: ${h.fromDomain||"—"}\nObserved provider: ${h.observedProvider||"—"}\nSPF/DKIM/DMARC: ${h.auth?`${h.auth.spf||"—"} / ${h.auth.dkim||"—"} / ${h.auth.dmarc||"—"}`:"—"}\nDisposition: ${$("#disp").value}\nNotes: ${$("#notes").value}`}
 $("#go").onclick=investigate;$("#domain").onkeydown=e=>{if(e.key==="Enter")investigate()};$("#talosBtn").onclick=()=>openUrl("talos");$("#vtBtn").onclick=()=>openUrl("vt");$("#dtBtn").onclick=()=>openUrl("dt");$("#stBtn").onclick=()=>openUrl("st");$("#wbBtn").onclick=()=>openUrl("wb");$("#ctBtn").onclick=ct;
 $("#save").onclick=()=>{localStorage.setItem(storageKey(),JSON.stringify({disp:$("#disp").value,notes:$("#notes").value}));$("#saved").textContent=" Saved in this browser."};
 $("#copy").onclick=async()=>{if(!current&&!parsedHeader)return alert("Investigate a domain or analyze a header first.");await navigator.clipboard.writeText(summaryText());$("#saved").textContent=" Summary copied."};

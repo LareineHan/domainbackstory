@@ -1,32 +1,19 @@
-# Domain Backstory v8
+# Domain Backstory v9
 
-## Major addition: browser-only email header analyzer
-Paste a raw Internet header or upload a `.txt`/`.eml` file. The raw header is parsed in frontend JavaScript and is **not sent to the Cloudflare Worker**.
+Main change: `Current DNS Footprint` is replaced with `Current Infrastructure`.
 
-The analyzer extracts:
-- From domain
-- Return-Path / smtp.mailfrom domain
-- DKIM signing domain from Authentication-Results
-- SPF / DKIM / DMARC results
-- public IPs observed in Received headers
-- Received hop count
-- common sending-provider clues (Mailgun, SendGrid, Mandrill, SES, Microsoft 365, Google, Proofpoint, Sophos, Mimecast)
+The main view now interprets:
+- Web/host destination from A/CNAME
+- Inbound email gateway from MX
+- Authorized outbound-provider clues from SPF
+- DNS-management provider from NS
+- DMARC when available
 
-It then compares those with:
-- current SPF record
-- current DMARC record
-- the investigated domain
-- provider clues
+Raw A/AAAA/MX/NS/CNAME/SOA records are still available under `Show raw DNS records`.
 
-## Important interpretation safeguards
-- MX is explicitly labeled as **inbound routing**, not an outbound baseline.
-- A different outbound provider from the MX is not flagged as suspicious by itself.
-- Authentication PASS does not prove the mailbox/SaaS account was uncompromised.
-- If malicious content passes SPF/DKIM/DMARC through expected infrastructure, the app suggests authorized-infrastructure abuse / account compromise as a **hypothesis**, not confirmation.
-- Current SPF can differ from the SPF record at the time the message was sent.
+Important interpretation safeguard:
+MX is inbound routing. The app never treats `MX = Sophos` plus `Observed sender = Mailgun` as suspicious by itself.
 
-## Privacy
-The raw header never leaves the browser in v8. However, users should still follow their organization's rules before pasting production email headers into any tool, even an internal/browser-only one.
+The email-header analyzer remains browser-only and compares the observed sending provider against current SPF authorization clues, SPF/DKIM/DMARC, From/Return-Path/DKIM domains, and the investigated domain.
 
-## Deploy
-Replace the existing repo contents with this package and push. Cloudflare should redeploy automatically.
+Deploy by replacing the existing repo with these files and pushing to GitHub.
