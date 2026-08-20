@@ -11,10 +11,10 @@
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-.wrap{max-width:1180px;margin:auto;padding:28px 18px 70px}
+.wrap{max-width:1200px;margin:auto;padding:28px 18px 70px}
 .hero{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}
 h1{margin:0 0 8px;font-size:38px;letter-spacing:-.035em}
-.sub{color:var(--muted);line-height:1.5;max-width:860px}
+.sub{color:var(--muted);line-height:1.5;max-width:880px}
 .badge{border:1px solid var(--line);background:var(--panel);padding:8px 11px;border-radius:999px;color:var(--muted);font-size:12px}
 .search{display:flex;gap:10px;margin:22px 0 14px;background:var(--panel);border:1px solid var(--line);padding:14px;border-radius:16px;position:sticky;top:8px;z-index:3}
 input,select,textarea,button{font:inherit}
@@ -32,7 +32,7 @@ h2{font-size:14px;letter-spacing:.09em;text-transform:uppercase;color:#d8d2ef;ma
 .status.ok{color:var(--good);border-color:rgba(127,223,176,.3)}
 .status.fail{color:var(--bad);border-color:rgba(255,138,154,.3)}
 .status.wait{color:var(--muted)}
-.kv{display:grid;grid-template-columns:180px 1fr;gap:9px 12px;font-size:14px}
+.kv{display:grid;grid-template-columns:190px 1fr;gap:9px 12px;font-size:14px}
 .k{color:var(--muted)}.v{overflow-wrap:anywhere}
 .hl{padding:5px 8px;border-radius:8px;display:inline-block}
 .hl.good{background:rgba(127,223,176,.11);color:var(--good);border:1px solid rgba(127,223,176,.25)}
@@ -55,20 +55,25 @@ h2{font-size:14px;letter-spacing:.09em;text-transform:uppercase;color:#d8d2ef;ma
 .dnsbox b{display:block;margin-bottom:6px}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;overflow-wrap:anywhere;color:#ddd8ef}
 .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .deepRow{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
-.deepRow:last-child{border-bottom:0}
-.deepRow .why{max-width:700px}
+.deepRow:last-child{border-bottom:0}.deepRow .why{max-width:720px}
 .notes{display:grid;grid-template-columns:250px 1fr;gap:12px}
 textarea,select{width:100%;background:#101018;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px}
 textarea{min-height:105px}
 .callout{border-left:3px solid var(--info);padding-left:10px;margin-top:12px}
+.lifecycle{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.lifeBox{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:13px}
+.lifeBox .label{color:var(--muted);font-size:12px;margin-bottom:6px}
+.lifeBox .value{font-weight:850;font-size:16px}
+.lifeBox.warn{border-color:rgba(255,211,122,.35)}.lifeBox.bad{border-color:rgba(255,138,154,.35)}.lifeBox.good{border-color:rgba(127,223,176,.35)}
 a{color:#bcaaff}
-@media(max-width:780px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.dnsgrid{grid-template-columns:1fr}.notes{grid-template-columns:1fr}.hero{display:block}.badge{display:inline-block;margin-top:10px}.search{flex-wrap:wrap}.search input{min-width:100%}}
+@media(max-width:900px){.lifecycle{grid-template-columns:1fr 1fr}}
+@media(max-width:780px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.dnsgrid{grid-template-columns:1fr}.notes{grid-template-columns:1fr}.hero{display:block}.badge{display:inline-block;margin-top:10px}.search{flex-wrap:wrap}.search input{min-width:100%}.lifecycle{grid-template-columns:1fr}}
 </style>
 </head>
 <body><div class="wrap">
 <div class="hero">
- <div><h1>Domain Backstory</h1><div class="sub">Fast context for suspicious sender domains: registration lifecycle, current DNS, archived-web evidence, and direct reputation pivots.</div></div>
- <div class="badge">RDAP · DNS · Wayback · Reputation pivots</div>
+ <div><h1>Domain Backstory</h1><div class="sub">Sender-domain triage with registration lifecycle, re-registration clues, current DNS, archived-web evidence, and direct reputation pivots.</div></div>
+ <div class="badge">RDAP · DNS · Wayback · Lifecycle clues</div>
 </div>
 
 <div class="search"><input id="domain" placeholder="example.com or paste an email / URL"><button id="go">Investigate</button></div>
@@ -91,6 +96,12 @@ a{color:#bcaaff}
  </section>
 
  <section class="card full">
+  <h2>Lifecycle / possible re-registration</h2>
+  <div id="lifecycle" class="muted">Waiting…</div>
+  <div class="callout muted"><b>Important:</b> free public RDAP does not expose a complete list of every past registration epoch. This section only reports what can be supported: current registration dates, registrar-transfer events, and whether archived web evidence predates the current registration.</div>
+ </section>
+
+ <section class="card full">
   <h2>Registration timeline</h2>
   <div id="timeline" class="muted">Waiting…</div>
  </section>
@@ -108,23 +119,23 @@ a{color:#bcaaff}
  <section class="card full">
   <h2>Deep investigation pivots</h2>
   <div class="deepRow">
-   <div class="why"><b>Cisco Talos Reputation</b><div class="muted">Check domain/web reputation and, when useful, the resolving IP. Talos' public site is rate-limited, so this app does not scrape it.</div></div>
+   <div class="why"><b>Cisco Talos Reputation</b><div class="muted">Check web/domain reputation and, when relevant, sender/resolving IP reputation.</div></div>
    <button class="secondary" id="talosBtn">Open Talos</button>
   </div>
   <div class="deepRow">
-   <div class="why"><b>VirusTotal Domain Report</b><div class="muted">Open the domain directly in the VirusTotal GUI without storing an API key in this app.</div></div>
+   <div class="why"><b>VirusTotal Domain Report</b><div class="muted">Open the domain directly in VirusTotal without storing an API key.</div></div>
    <button class="secondary" id="vtBtn">Open VirusTotal</button>
   </div>
   <div class="deepRow">
-   <div class="why"><b>Historical WHOIS / ownership</b><div class="muted">Use when you need registrar/registrant history. Current RDAP cannot reliably tell you who owned the domain in the past.</div></div>
+   <div class="why"><b>Historical WHOIS / registration epochs</b><div class="muted">This is where you can verify older registrar/registrant records and repeated registration periods that free RDAP cannot enumerate.</div></div>
    <div class="actions"><button class="ghost" id="dtBtn">DomainTools</button><button class="ghost" id="stBtn">SecurityTrails</button></div>
   </div>
   <div class="deepRow">
-   <div class="why"><b>Archived website identity</b><div class="muted">Compare old pages with the current organization's identity. A Wayback snapshot is an archived copy, not a creation date or ownership event.</div></div>
+   <div class="why"><b>Historical website identity</b><div class="muted">Compare archived pages across time to see whether the domain's public identity or purpose changed.</div></div>
    <button class="ghost" id="wbBtn">Open Wayback</button>
   </div>
   <div class="deepRow">
-   <div class="why"><b>Certificate Transparency</b><div class="muted">Optional enrichment only. Public CT search can be slow/unreliable, so it is not part of the primary verdict.</div></div>
+   <div class="why"><b>Certificate Transparency</b><div class="muted">Optional enrichment only. Public CT search can be slow, so it never controls the main assessment.</div></div>
    <button class="ghost" id="ctBtn">Try CT lookup</button>
   </div>
   <div id="ctResult" class="muted" style="margin-top:10px"></div>
@@ -136,13 +147,14 @@ a{color:#bcaaff}
    <select id="disp">
     <option>No disposition yet</option>
     <option>Likely attacker-registered</option>
+    <option>Possible re-registered / repurposed domain</option>
     <option>Possible legitimate account/service compromise</option>
     <option>Possible domain/infrastructure takeover</option>
     <option>Likely legitimate service abuse</option>
     <option>Benign / insufficient evidence</option>
     <option>Needs more investigation</option>
    </select>
-   <textarea id="notes" placeholder="Why this domain stood out, related senders/campaigns, internal Defender findings, etc."></textarea>
+   <textarea id="notes" placeholder="Why this domain stood out, related senders/campaigns, internal Defender findings, historical WHOIS observations, etc."></textarea>
   </div>
   <div class="actions"><button id="save">Save locally</button><button class="secondary" id="copy">Copy summary</button></div>
   <span id="saved" class="muted"></span>
@@ -154,7 +166,7 @@ const $=s=>document.querySelector(s); let current=null;
 
 function clean(x){
  x=(x||"").trim().toLowerCase();
- if(x.includes("@")&&!x.includes("://")) x=x.split("@").pop();
+ if(x.includes("@")&&!x.includes("://"))x=x.split("@").pop();
  try{if(x.includes("://"))x=new URL(x).hostname}catch{}
  return x.split("/")[0].split(":")[0].replace(/^\.+|\.+$/g,"");
 }
@@ -162,121 +174,138 @@ function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&l
 function fmt(x){if(!x)return"—";const d=new Date(x);return isNaN(d)?String(x):d.toLocaleDateString()}
 function ago(x){if(!x)return null;const d=new Date(x);return isNaN(d)?null:Math.floor((Date.now()-d)/86400000)}
 function until(x){if(!x)return null;const d=new Date(x);return isNaN(d)?null:Math.ceil((d-Date.now())/86400000)}
-function ageText(x){const n=ago(x);if(n===null)return"—";const y=Math.floor(n/365.25),m=Math.floor((n-y*365.25)/30.44);return `${y}y ${m}m`}
+function diffDays(a,b){const x=new Date(a),y=new Date(b);return(isNaN(x)||isNaN(y))?null:Math.round((y-x)/86400000)}
+function ageText(x){const n=ago(x);if(n===null)return"—";const y=Math.floor(n/365.25),m=Math.floor((n-y*365.25)/30.44);return`${y}y ${m}m`}
 async function api(path){const r=await fetch(path);let j;try{j=await r.json()}catch{throw new Error(`API returned ${r.status}`)}if(!r.ok)throw new Error(j.error||`HTTP ${r.status}`);return j}
 function status(id,state,text){const e=$("#"+id);e.className="status "+state;e.textContent=text}
-function cDate(d,type){
- const n=type==="expiry"?until(d):ago(d); if(n===null)return"info";
- if(type==="created"){if(n<90)return"bad";if(n<365)return"warn";if(n>1825)return"good"}
- if(type==="changed"){if(n<30)return"warn";if(n<90)return"info"}
- if(type==="expiry"){if(n<30)return"bad";if(n<90)return"warn"}
- return"info";
-}
-function row(k,v,c=""){return `<div class="k">${esc(k)}</div><div class="v">${c?`<span class="hl ${c}">${esc(v??"—")}</span>`:esc(v??"—")}</div>`}
+function cDate(d,type){const n=type==="expiry"?until(d):ago(d);if(n===null)return"info";if(type==="created"){if(n<90)return"bad";if(n<365)return"warn";if(n>1825)return"good"}if(type==="changed"){if(n<30)return"warn";if(n<90)return"info"}if(type==="expiry"){if(n<30)return"bad";if(n<90)return"warn"}return"info"}
+function row(k,v,c=""){return`<div class="k">${esc(k)}</div><div class="v">${c?`<span class="hl ${c}">${esc(v??"—")}</span>`:esc(v??"—")}</div>`}
 
 async function investigate(){
- const d=clean($("#domain").value); if(!d||!d.includes("."))return alert("Enter a valid domain.");
- $("#domain").value=d; current={domain:d,rdap:null,dns:null,wb:null,errors:{}};
- ["rdap","dns","wb","timeline"].forEach(id=>$("#"+id).textContent="Looking up…"); $("#signal").textContent="Building context…"; $("#flags").innerHTML=""; $("#ctResult").textContent="";
+ const d=clean($("#domain").value);if(!d||!d.includes("."))return alert("Enter a valid domain.");
+ $("#domain").value=d;current={domain:d,rdap:null,dns:null,wb:null,errors:{}};
+ ["rdap","dns","wb","timeline","lifecycle"].forEach(id=>$("#"+id).textContent="Looking up…");$("#signal").textContent="Building context…";$("#flags").innerHTML="";$("#ctResult").textContent="";
  status("s-rdap","wait","Registration: loading");status("s-dns","wait","DNS: loading");status("s-wb","wait","Wayback: loading");
-
  const jobs=[
   api("/api/rdap?domain="+encodeURIComponent(d)).then(x=>{current.rdap=x;renderRDAP(x);status("s-rdap","ok",x.cached?"Registration: OK · cached":"Registration: OK")}).catch(e=>{current.errors.rdap=e.message;$("#rdap").innerHTML=`<span class="bad-text">LOOKUP FAILED: ${esc(e.message)}</span>`;status("s-rdap","fail","Registration: failed")}),
   api("/api/dns?domain="+encodeURIComponent(d)).then(x=>{current.dns=x;renderDNS(x);status("s-dns","ok",x.cached?"DNS: OK · cached":"DNS: OK")}).catch(e=>{current.errors.dns=e.message;$("#dns").innerHTML=`<span class="bad-text">LOOKUP FAILED: ${esc(e.message)}</span>`;status("s-dns","fail","DNS: failed")}),
   api("/api/wayback?domain="+encodeURIComponent(d)).then(x=>{current.wb=x;renderWB(x);status("s-wb","ok",x.cached?"Wayback: OK · cached":"Wayback: OK")}).catch(e=>{current.errors.wb=e.message;$("#wb").innerHTML=`<span class="muted">Wayback unavailable: ${esc(e.message)}</span>`;status("s-wb","fail","Wayback: unavailable")})
  ];
- await Promise.allSettled(jobs); renderSignal(); renderTimeline(); loadSaved();
+ await Promise.allSettled(jobs);renderSignal();renderLifecycle();renderTimeline();loadSaved();
 }
 
 function renderRDAP(x){
  let h='<div class="kv">';
- h+=row("Domain created",fmt(x.created),cDate(x.created,"created"));
- h+=row("Domain changed",fmt(x.changed),cDate(x.changed,"changed"));
+ h+=row("Current registration created",fmt(x.created),cDate(x.created,"created"));
+ h+=row("Domain record changed",fmt(x.changed),cDate(x.changed,"changed"));
+ h+=row("Last registrar transfer",fmt(x.transfer),x.transfer?"info":"");
  h+=row("Registry expires",fmt(x.expires),cDate(x.expires,"expiry"));
  h+=row("Registrar expires",fmt(x.registrar_expires),cDate(x.registrar_expires,"expiry"));
  h+=row("RDAP DB updated",fmt(x.rdap_db_updated));
- h+=row("Domain age",x.created?ageText(x.created):"—",x.created&&ago(x.created)>1825?"good":"info");
+ h+=row("Current registration age",x.created?ageText(x.created):"—",x.created&&ago(x.created)>1825?"good":"info");
  h+=row("Registrar",x.registrar||"—");
  h+=row("Registrar IANA ID",x.registrar_iana_id||"—");
- h+=row("Registrar record created",fmt(x.registrar_entity_created));
- h+=row("Registrar record changed",fmt(x.registrar_entity_changed));
+ h+=row("Registrar entity created",fmt(x.registrar_entity_created));
+ h+=row("Registrar entity changed",fmt(x.registrar_entity_changed));
  h+=row("Nameservers",(x.nameservers||[]).join(", ")||"—");
  h+=row("Domain status",(x.status||[]).join(", ")||"—");
- h+='</div><div class="callout muted">“Changed” means the registration record changed. RDAP does not tell us what changed unless the registry exposes more detail. Registrar record dates are shown only if that registrar entity provides them.</div>';
+ h+='</div><div class="callout muted">The current registration creation date is not guaranteed to be the domain’s first-ever registration. If a domain was deleted and later re-registered, the current creation date can represent the newer lifecycle.</div>';
  $("#rdap").innerHTML=h;
 }
-
-function dnsBox(title,vals){
- const arr=vals||[]; return `<div class="dnsbox"><b>${esc(title)}</b>${arr.length?arr.map(v=>`<div class="mono">${esc(v)}</div>`).join(""):'<div class="muted">None returned</div>'}</div>`;
-}
-function renderDNS(x){
- $("#dns").innerHTML='<div class="dnsgrid">'+dnsBox("A",x.A)+dnsBox("AAAA",x.AAAA)+dnsBox("MX",x.MX)+dnsBox("NS",x.NS)+dnsBox("CNAME",x.CNAME)+dnsBox("SOA",x.SOA)+'</div><div class="muted" style="margin-top:10px">Current DNS is context, not historical DNS. Use historical-DNS services only when infrastructure change matters.</div>';
-}
-
+function dnsBox(title,vals){const a=vals||[];return`<div class="dnsbox"><b>${esc(title)}</b>${a.length?a.map(v=>`<div class="mono">${esc(v)}</div>`).join(""):'<div class="muted">None returned</div>'}</div>`}
+function renderDNS(x){$("#dns").innerHTML='<div class="dnsgrid">'+dnsBox("A",x.A)+dnsBox("AAAA",x.AAAA)+dnsBox("MX",x.MX)+dnsBox("NS",x.NS)+dnsBox("CNAME",x.CNAME)+dnsBox("SOA",x.SOA)+'</div><div class="muted" style="margin-top:10px">Current DNS only. It does not show prior IP/MX/NS history.</div>'}
 function renderWB(x){
- const c=x.closest;
- let h='<div class="kv">'+row("Archived page",c?.available?"Found":"Not returned",c?.available?"good":"info")+row("Snapshot date",fmt(c?.timestamp))+row("HTTP status",c?.status||"—")+'</div>';
- if(c?.url)h+=`<div style="margin-top:10px"><a target="_blank" rel="noopener" href="${esc(c.url)}">View archived copy</a></div>`;
- h+='<div class="callout muted"><b>Meaning:</b> Wayback stored a copy of the site around this date. It does not indicate when the website was created, who owned it, or whether it was compromised.</div>';
+ const o=x.oldest,l=x.latest;
+ let h='<div class="kv">'+row("Oldest snapshot returned",fmt(o?.timestamp),o?.available?"good":"info")+row("Latest snapshot returned",fmt(l?.timestamp))+row("Old archived page",o?.available?"Found":"Not returned",o?.available?"good":"info")+'</div>';
+ if(o?.url)h+=`<div style="margin-top:10px"><a target="_blank" rel="noopener" href="${esc(o.url)}">View older archived copy</a></div>`;
+ if(l?.url)h+=`<div style="margin-top:6px"><a target="_blank" rel="noopener" href="${esc(l.url)}">View latest archived copy</a></div>`;
+ h+='<div class="callout muted">These are archived copies returned by a lightweight Wayback lookup. They are not guaranteed to be the first or last captures ever made.</div>';
  $("#wb").innerHTML=h;
 }
 
-function renderSignal(){
- const r=current.rdap,d=current.dns; let score=0,why=[],cls="info",title="Context available";
- if(r?.created){const n=ago(r.created);if(n<90){score+=3;why.push("very recently registered")}else if(n<365){score+=1;why.push("domain under one year old")}else if(n>1825){score-=1;why.push("long-established registration")}}
- if(r?.changed){const n=ago(r.changed);if(n>=0&&n<30){score+=1;why.push("registration record changed recently")}}
- if(r?.expires){const n=until(r.expires);if(n!==null&&n<30){score+=1;why.push("registry expiration is near")}}
- if(score>=3){cls="bad";title="New attacker-controlled domain is plausible"}
- else if(score>=1){cls="warn";title="Worth a closer look"}
- else if(score<=-1){cls="good";title="Established domain context"}
- else{cls="info";title="No strong registration-lifecycle anomaly"}
- const misses=Object.keys(current.errors).length; if(misses)why.push(`${misses} source(s) unavailable`);
- $("#signal").innerHTML=`<div class="signal ${cls}"><div class="big">${esc(title)}</div><div class="muted">${esc(why.length?why.join(" · "):"No configured registration rule fired.")}</div></div>`;
- const f=[];
- if(r?.created&&ago(r.created)<90)f.push(["bad","Recently registered",`Created ${ago(r.created)} days ago.`]);
- if(r?.changed&&ago(r.changed)<30)f.push(["warn","Recent registration change",`RDAP says the domain record changed ${ago(r.changed)} days ago. It does not identify the changed field.`]);
- if(r?.created&&ago(r.created)>1825)f.push(["good","Long-established registration",`The domain has existed for about ${Math.floor(ago(r.created)/365.25)} years.`]);
- if(d?.MX?.length)f.push(["info","Mail infrastructure",`Current MX: ${d.MX.slice(0,2).join(" · ")}`]);
- if(!f.length)f.push(["info","No major registration flag","Use reputation, message behavior, and internal telemetry for the next decision."]);
- $("#flags").innerHTML=f.map(([c,t,b])=>`<div class="flag"><div class="flag-title ${c}-text">${esc(t)}</div><div class="muted">${esc(b)}</div></div>`).join("");
+function priorLifecycle(){
+ const r=current?.rdap,w=current?.wb;
+ if(!r?.created||!w?.oldest?.available||!w.oldest.timestamp)return{state:"unknown",gap:null};
+ const gap=diffDays(w.oldest.timestamp,r.created);
+ if(gap!==null&&gap>30)return{state:"yes",gap};
+ return{state:"no",gap};
+}
+function renderLifecycle(){
+ const r=current.rdap,w=current.wb,p=priorLifecycle();
+ let priorClass=p.state==="yes"?"warn":p.state==="no"?"good":"";
+ let priorValue=p.state==="yes"?"YES — archived web predates current registration":p.state==="no"?"No evidence from lightweight archive check":"Unknown";
+ let transfer=r?.transfer?fmt(r.transfer):"Not reported";
+ $("#lifecycle").innerHTML=`<div class="lifecycle">
+  <div class="lifeBox ${r?.created&&ago(r.created)<365?"warn":"good"}"><div class="label">Current registration started</div><div class="value">${esc(fmt(r?.created))}</div></div>
+  <div class="lifeBox ${r?.transfer?"warn":""}"><div class="label">Last registrar transfer</div><div class="value">${esc(transfer)}</div></div>
+  <div class="lifeBox ${priorClass}"><div class="label">Evidence of an earlier web lifecycle</div><div class="value">${esc(priorValue)}</div></div>
+ </div>`;
+ if(p.state==="yes"){
+   const years=(p.gap/365.25).toFixed(1);
+   $("#lifecycle").innerHTML+=`<div class="signal warn" style="margin-top:12px"><div class="big">Possible re-registration / repurposing clue</div><div class="muted">Wayback returned an archived page about ${esc(years)} years before the current RDAP registration creation date. That strongly suggests the domain existed in an earlier lifecycle. It does <b>not</b> prove malicious re-registration or tell us how many registration cycles occurred.</div></div>`;
+ } else if(p.state==="no"){
+   $("#lifecycle").innerHTML+='<div class="muted" style="margin-top:12px">No archived page older than the current registration was returned by this lightweight check. That does not prove there was never an earlier registration.</div>';
+ } else {
+   $("#lifecycle").innerHTML+='<div class="muted" style="margin-top:12px">Insufficient data to infer an earlier lifecycle.</div>';
+ }
+ $("#lifecycle").innerHTML+=`<div class="kv" style="margin-top:14px">
+   ${row("Exact re-registration count","Not determinable from free RDAP")}
+   ${row("Inactive gap length","Not determinable without historical registration/DNS data")}
+   ${row("Best verification","Historical WHOIS / passive DNS")}
+ </div>`;
 }
 
+function renderSignal(){
+ const r=current.rdap,d=current.dns,p=priorLifecycle();let score=0,why=[],cls="info",title="Context available";
+ if(r?.created){const n=ago(r.created);if(n<90){score+=3;why.push("very recently registered")}else if(n<365){score+=1;why.push("current registration under one year old")}else if(n>1825){score-=1;why.push("long-established current registration")}}
+ if(r?.changed){const n=ago(r.changed);if(n>=0&&n<30){score+=1;why.push("registration record changed recently")}}
+ if(r?.transfer){const n=ago(r.transfer);if(n>=0&&n<90){score+=1;why.push("recent registrar transfer")}}
+ if(p.state==="yes"){score+=2;why.push("archived web evidence predates current registration")}
+ if(score>=3){cls="bad";title="Strong lifecycle clue — investigate ownership/re-registration"}
+ else if(score>=1){cls="warn";title="Worth a closer look"}
+ else if(score<=-1){cls="good";title="Established current registration context"}
+ else{cls="info";title="No strong registration-lifecycle anomaly"}
+ const misses=Object.keys(current.errors).length;if(misses)why.push(`${misses} source(s) unavailable`);
+ $("#signal").innerHTML=`<div class="signal ${cls}"><div class="big">${esc(title)}</div><div class="muted">${esc(why.length?why.join(" · "):"No configured registration rule fired.")}</div></div>`;
+ const f=[];
+ if(r?.created&&ago(r.created)<90)f.push(["bad","Recently registered",`Current registration started ${ago(r.created)} days ago.`]);
+ if(r?.changed&&ago(r.changed)<30)f.push(["warn","Recent registration change",`RDAP says the domain record changed ${ago(r.changed)} days ago; it does not identify the changed field.`]);
+ if(r?.transfer&&ago(r.transfer)<90)f.push(["warn","Recent registrar transfer",`RDAP reports a registrar transfer ${ago(r.transfer)} days ago.`]);
+ if(p.state==="yes")f.push(["warn","Earlier lifecycle evidence",`Archived web content predates the current registration by about ${(p.gap/365.25).toFixed(1)} years.`]);
+ if(r?.created&&ago(r.created)>1825)f.push(["good","Long-established current registration",`Current lifecycle is about ${Math.floor(ago(r.created)/365.25)} years old.`]);
+ if(d?.MX?.length)f.push(["info","Mail infrastructure",`Current MX: ${d.MX.slice(0,2).join(" · ")}`]);
+ if(!f.length)f.push(["info","No major lifecycle flag","Use reputation, message behavior, and internal telemetry for the next decision."]);
+ $("#flags").innerHTML=f.map(([c,t,b])=>`<div class="flag"><div class="flag-title ${c}-text">${esc(t)}</div><div class="muted">${esc(b)}</div></div>`).join("");
+}
 function renderTimeline(){
- const r=current.rdap,e=[];
- if(r?.created)e.push([r.created,"Domain registration"]);
- if(r?.registrar_entity_created)e.push([r.registrar_entity_created,"Registrar entity created"]);
+ const r=current.rdap,w=current.wb,e=[];
+ if(w?.oldest?.timestamp)e.push([w.oldest.timestamp,"Old archived web copy"]);
+ if(r?.created)e.push([r.created,"Current registration created"]);
+ if(r?.transfer)e.push([r.transfer,"Registrar transfer"]);
  if(r?.changed)e.push([r.changed,"Domain record changed"]);
- if(r?.registrar_entity_changed)e.push([r.registrar_entity_changed,"Registrar entity changed"]);
  if(r?.rdap_db_updated)e.push([r.rdap_db_updated,"RDAP database updated"]);
+ if(w?.latest?.timestamp)e.push([w.latest.timestamp,"Latest archived web copy"]);
  if(r?.registrar_expires)e.push([r.registrar_expires,"Registrar expiration"]);
  if(r?.expires)e.push([r.expires,"Registry expiration"]);
  e.sort((a,b)=>new Date(a[0])-new Date(b[0]));
- $("#timeline").innerHTML=e.length?'<div class="timeline">'+e.map(([d,t])=>`<div class="event"><div class="date">${esc(fmt(d))}</div><b>${esc(t)}</b></div>`).join("")+'</div>':'<span class="muted">No registration-event timeline returned.</span>';
+ $("#timeline").innerHTML=e.length?'<div class="timeline">'+e.map(([d,t])=>`<div class="event"><div class="date">${esc(fmt(d))}</div><b>${esc(t)}</b></div>`).join("")+'</div>':'<span class="muted">No timeline data returned.</span>';
 }
-
 function domain(){return current?.domain||clean($("#domain").value)}
 function openUrl(kind){
  const d=domain();if(!d)return alert("Enter a domain first.");
- const urls={
-  talos:"https://www.talosintelligence.com/reputation_center",
-  vt:"https://www.virustotal.com/gui/domain/"+encodeURIComponent(d),
-  dt:"https://whois.domaintools.com/"+encodeURIComponent(d),
-  st:"https://securitytrails.com/domain/"+encodeURIComponent(d)+"/history",
-  wb:"https://web.archive.org/web/*/"+encodeURIComponent(d)+"/*"
- };
+ const urls={talos:"https://www.talosintelligence.com/reputation_center",vt:"https://www.virustotal.com/gui/domain/"+encodeURIComponent(d),dt:"https://whois.domaintools.com/"+encodeURIComponent(d),st:"https://securitytrails.com/domain/"+encodeURIComponent(d)+"/history",wb:"https://web.archive.org/web/*/"+encodeURIComponent(d)+"/*"};
  window.open(urls[kind],"_blank","noopener");
 }
 async function ct(){
- const d=domain();if(!d)return alert("Enter a domain first.");
- $("#ctResult").textContent="Trying public CT lookup…";
+ const d=domain();if(!d)return alert("Enter a domain first.");$("#ctResult").textContent="Trying public CT lookup…";
  try{const x=await api("/api/ct?domain="+encodeURIComponent(d));$("#ctResult").innerHTML=`CT returned ${x.unique_certificates} certificate record(s), ${x.unique_names} hostname(s). Newest observed: ${esc(fmt(x.newest))}. ${x.recent_names?.slice(0,5).map(n=>esc(n.name)).join(", ")||""}`}
  catch(e){$("#ctResult").innerHTML=`<span class="muted">CT unavailable (${esc(e.message)}). This does not affect the primary assessment.</span>`}
 }
 function storageKey(){return"domainBackstory:"+domain()}
 function loadSaved(){const x=JSON.parse(localStorage.getItem(storageKey())||"null");if(x){$("#disp").value=x.disp;$("#notes").value=x.notes}else{$("#disp").value="No disposition yet";$("#notes").value=""}}
 function summaryText(){
- const r=current?.rdap||{},d=current?.dns||{};
- return `Domain: ${domain()}\nCreated: ${fmt(r.created)}\nChanged: ${fmt(r.changed)}\nRegistry expires: ${fmt(r.expires)}\nRegistrar expires: ${fmt(r.registrar_expires)}\nRegistrar: ${r.registrar||"—"}\nRegistrar IANA ID: ${r.registrar_iana_id||"—"}\nNameservers: ${(r.nameservers||[]).join(", ")||"—"}\nMX: ${(d.MX||[]).join(", ")||"—"}\nDisposition: ${$("#disp").value}\nNotes: ${$("#notes").value}`;
+ const r=current?.rdap||{},d=current?.dns||{},p=priorLifecycle();
+ return `Domain: ${domain()}\nCurrent registration created: ${fmt(r.created)}\nDomain changed: ${fmt(r.changed)}\nLast registrar transfer: ${fmt(r.transfer)}\nRegistry expires: ${fmt(r.expires)}\nRegistrar: ${r.registrar||"—"}\nRegistrar IANA ID: ${r.registrar_iana_id||"—"}\nEarlier lifecycle evidence: ${p.state}\nNameservers: ${(r.nameservers||[]).join(", ")||"—"}\nMX: ${(d.MX||[]).join(", ")||"—"}\nDisposition: ${$("#disp").value}\nNotes: ${$("#notes").value}`;
 }
 $("#go").onclick=investigate;$("#domain").onkeydown=e=>{if(e.key==="Enter")investigate()};
 $("#talosBtn").onclick=()=>openUrl("talos");$("#vtBtn").onclick=()=>openUrl("vt");$("#dtBtn").onclick=()=>openUrl("dt");$("#stBtn").onclick=()=>openUrl("st");$("#wbBtn").onclick=()=>openUrl("wb");$("#ctBtn").onclick=ct;
