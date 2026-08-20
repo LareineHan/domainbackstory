@@ -262,7 +262,7 @@ const L={
   subtitle:"수상한 발신 도메인을 빠르게 판단하기 위한 조사 도구입니다. 등록정보, 현재 인프라, 과거 웹 흔적, 이메일 헤더를 한 화면에서 비교합니다.",
   domainPH:"도메인, 이메일 주소 또는 URL을 입력하세요",
   investigate:"조사하기",
-  statusReg:"등록정보: 대기", statusInfra:"인프라: 대기", statusWeb:"Wayback: 대기", loadingHeadline:"도메인을 조사하는 중", loadingBody:"등록정보, 현재 인프라, 과거 웹 기록을 확인하고 있습니다.", loadingNext:"잠시만 기다려 주세요. 일부 공개 소스는 몇 초 걸릴 수 있습니다.",
+  statusReg:"등록정보: 대기", statusInfra:"인프라: 대기", statusWeb:"Wayback: 대기", loadingHeadline:"도메인을 조사하는 중", loadingBody:"여러 소스를 동시에 확인하고 있습니다. 완료되는 결과부터 바로 표시합니다.", loadingNext:"핵심 결과가 먼저 표시되고, 느린 소스는 전체 화면을 막지 않습니다.",
   summaryEyebrow:"빠른 요약", noDomain:"도메인을 입력해 주세요.", noDomainBody:"핵심 신호와 다음 조사 방향을 여기서 먼저 보여줍니다.", next:"다음 조사", start:"도메인을 먼저 조사하세요.",
   stands:"한눈에 보기", standsHint:"판단에 필요한 신호만", reg:"등록 라이프사이클", life:"재등록 / 재사용 가능성", lifeHint:"과거 lifecycle 단서", time:"등록 타임라인",
   infra:"현재 인프라", infraHint:"사람이 읽기 쉽게 해석", web:"과거 웹 기록", header:"이메일 헤더 분석", headerHint:"브라우저에서만 처리",
@@ -291,7 +291,7 @@ const L={
   subtitle:"A fast triage tool for suspicious sender domains. Compare registration, current infrastructure, historical web evidence, and email headers in one place.",
   domainPH:"Enter a domain, email address, or URL",
   investigate:"Investigate",
-  statusReg:"Registration: waiting", statusInfra:"Infrastructure: waiting", statusWeb:"Wayback: waiting", loadingHeadline:"Investigating domain", loadingBody:"Checking registration, current infrastructure, and historical web evidence.", loadingNext:"Please wait. Some public sources can take a few seconds.",
+  statusReg:"Registration: waiting", statusInfra:"Infrastructure: waiting", statusWeb:"Wayback: waiting", loadingHeadline:"Investigating domain", loadingBody:"Checking multiple sources in parallel. Results appear as soon as each source finishes.", loadingNext:"Core results appear first; slow sources no longer block the whole page.",
   summaryEyebrow:"Quick summary", noDomain:"Enter a domain to begin.", noDomainBody:"Key signals and the next investigation direction appear here first.", next:"Next step", start:"Investigate a domain first.",
   stands:"What stands out", standsHint:"Only decision-useful signals", reg:"Registration lifecycle", life:"Possible re-registration / repurposing", lifeHint:"Earlier lifecycle clues", time:"Registration timeline",
   infra:"Current infrastructure", infraHint:"Interpreted for analysts", web:"Historical web evidence", header:"Email header analyzer", headerHint:"Processed only in browser",
@@ -331,7 +331,18 @@ function fmt(x){if(!x)return"—";const d=new Date(x);return isNaN(d)?String(x):
 function ago(x){if(!x)return null;const d=new Date(x);return isNaN(d)?null:Math.floor((Date.now()-d)/86400000)}
 function diffDays(a,b){const x=new Date(a),y=new Date(b);return(isNaN(x)||isNaN(y))?null:Math.round((y-x)/86400000)}
 function clean(x){x=(x||"").trim().toLowerCase();if(x.includes("@")&&!x.includes("://"))x=x.split("@").pop();try{if(x.includes("://"))x=new URL(x).hostname}catch{}return x.split("/")[0].split(":")[0].replace(/^\.+|\.+$/g,"")}
-async function api(path){const r=await fetch(path);let j;try{j=await r.json()}catch{throw new Error("HTTP "+r.status)}if(!r.ok)throw new Error(j.error||("HTTP "+r.status));return j}
+async function api(path,timeoutMs=12000){
+ const c=new AbortController(),t=setTimeout(()=>c.abort(),timeoutMs);
+ try{
+  const r=await fetch(path,{signal:c.signal});
+  let j;try{j=await r.json()}catch{throw new Error("HTTP "+r.status)}
+  if(!r.ok)throw new Error(j.error||("HTTP "+r.status));
+  return j;
+ }catch(e){
+  if(e.name==="AbortError")throw new Error(LANG==="ko"?"조회 시간 초과":"Request timed out");
+  throw e;
+ }finally{clearTimeout(t)}
+}
 function setStatus(id,state,text){const el=$(id);el.className="status "+state;el.textContent=text}
 function tag(value,cls="info"){return `<span class="tag ${cls}">${esc(value??"—")}</span>`}
 function kvRow(k,v,cls=""){return `<div class="k">${esc(k)}</div><div class="v">${cls?tag(v,cls):esc(v??"—")}</div>`}
@@ -365,26 +376,78 @@ function spfProviders(spf){
 }
 
 async function investigate(){
- const d=clean($("#domain").value);if(!d||!d.includes("."))return alert(LANG==="ko"?"유효한 도메인을 입력하세요.":"Enter a valid domain.");
- $("#domain").value=d;current={domain:d,rdap:null,dns:null,maildns:null,wb:null,errors:{},loading:true};
+ const d=clean($("#domain").value);
+ if(!d||!d.includes("."))return alert(LANG==="ko"?"유효한 도메인을 입력하세요.":"Enter a valid domain.");
+ $("#domain").value=d;
+ current={domain:d,rdap:null,dns:null,maildns:null,wb:null,errors:{},loading:true};
  renderLoadingSummary();
  $("#signal").innerHTML=`<div class="notice info"><b>${esc(T("loadingHeadline"))}</b><p>${esc(T("loadingBody"))}</p></div>`;
- $("#rdap").innerHTML=`<div class="loaderWrap"><div class="cube"></div><div class="muted"><span class="loadingDots">${esc(T("loading"))}</span></div></div>`;
- $("#infra").innerHTML=`<div class="loaderWrap"><div class="cube"></div><div class="muted"><span class="loadingDots">${esc(T("loading"))}</span></div></div>`;
- $("#wb").innerHTML=`<div class="loaderWrap"><div class="cube"></div><div class="muted"><span class="loadingDots">${esc(T("loading"))}</span></div></div>`;
- $("#timeline").innerHTML=`<div class="loaderWrap"><div class="cube"></div><div class="muted"><span class="loadingDots">${esc(T("loading"))}</span></div></div>`;
- $("#lifecycle").innerHTML=`<div class="loaderWrap"><div class="cube"></div><div class="muted"><span class="loadingDots">${esc(T("loading"))}</span></div></div>`;
- setTimeout(()=>{if(current?.loading&&current.domain===d){$("#qsNext").innerHTML=`<b>${esc(T("next"))}:</b> ${esc(LANG==="ko"?"아직 조회 중입니다. 공개 소스 응답이 느릴 수 있습니다. 20초 이상 지속되면 다시 시도해 보세요.":"Still working. Public sources can be slow. If this lasts more than 20 seconds, try again.")}`;}},12000);
+ const loader=`<div class="loaderWrap"><div class="cube"></div><div class="muted"><span class="loadingDots">${esc(T("loading"))}</span></div></div>`;
+ $("#rdap").innerHTML=loader;$("#infra").innerHTML=loader;$("#wb").innerHTML=loader;$("#timeline").innerHTML=loader;$("#lifecycle").innerHTML=loader;
  setStatus("s-rdap","wait",LANG==="ko"?"등록정보: 조회 중":"Registration: loading");
  setStatus("s-dns","wait",LANG==="ko"?"인프라: 조회 중":"Infrastructure: loading");
  setStatus("s-wb","wait","Wayback: loading");
- const jobs=[
-  api("/api/rdap?domain="+encodeURIComponent(d)).then(x=>{current.rdap=x;setStatus("s-rdap","ok",LANG==="ko"?"등록정보: 확인됨":"Registration: OK")}).catch(e=>{current.errors.rdap=e.message;setStatus("s-rdap","fail",LANG==="ko"?"등록정보: 조회 불가":"Registration: unavailable")}),
-  api("/api/dns?domain="+encodeURIComponent(d)).then(x=>{current.dns=x;setStatus("s-dns","ok",LANG==="ko"?"인프라: 확인됨":"Infrastructure: OK")}).catch(e=>{current.errors.dns=e.message;setStatus("s-dns","fail",LANG==="ko"?"인프라: 조회 불가":"Infrastructure: unavailable")}),
-  api("/api/maildns?domain="+encodeURIComponent(d)).then(x=>current.maildns=x).catch(()=>{}),
-  api("/api/wayback?domain="+encodeURIComponent(d)).then(x=>{current.wb=x;setStatus("s-wb","ok","Wayback: OK")}).catch(e=>{current.errors.wb=e.message;setStatus("s-wb","fail","Wayback: unavailable")})
- ];
- await Promise.allSettled(jobs);current.loading=false;renderAll();loadSaved();
+
+ let coreFinished=0;
+ const coreDone=()=>{
+   if(current?.domain!==d)return;
+   coreFinished++;
+   if(coreFinished>=2){
+     current.loading=false;
+     renderQuickSummary();
+   }
+ };
+
+ api("/api/rdap?domain="+encodeURIComponent(d),15000)
+  .then(x=>{
+    if(current?.domain!==d)return;
+    current.rdap=x;setStatus("s-rdap","ok",LANG==="ko"?"등록정보: 확인됨":"Registration: OK");
+    renderRegistration();renderLifecycle();renderTimeline();renderSignals();renderQuickSummary();
+  })
+  .catch(e=>{
+    if(current?.domain!==d)return;
+    current.errors.rdap=e.message;setStatus("s-rdap","fail",LANG==="ko"?"등록정보: 조회 불가":"Registration: unavailable");
+    renderRegistration();renderLifecycle();renderTimeline();renderSignals();renderQuickSummary();
+  })
+  .finally(coreDone);
+
+ api("/api/dns?domain="+encodeURIComponent(d),10000)
+  .then(x=>{
+    if(current?.domain!==d)return;
+    current.dns=x;setStatus("s-dns","ok",LANG==="ko"?"인프라: 확인됨":"Infrastructure: OK");
+    renderInfrastructure();renderSignals();renderQuickSummary();
+  })
+  .catch(e=>{
+    if(current?.domain!==d)return;
+    current.errors.dns=e.message;setStatus("s-dns","fail",LANG==="ko"?"인프라: 조회 불가":"Infrastructure: unavailable");
+    renderInfrastructure();renderQuickSummary();
+  })
+  .finally(coreDone);
+
+ api("/api/maildns?domain="+encodeURIComponent(d),9000)
+  .then(x=>{
+    if(current?.domain!==d)return;
+    current.maildns=x;renderInfrastructure();renderQuickSummary();if(parsedHeader)renderHeaderComparison();
+  }).catch(()=>{});
+
+ api("/api/wayback?domain="+encodeURIComponent(d),9000)
+  .then(x=>{
+    if(current?.domain!==d)return;
+    current.wb=x;setStatus("s-wb","ok","Wayback: OK");renderWayback();renderLifecycle();renderTimeline();
+  })
+  .catch(e=>{
+    if(current?.domain!==d)return;
+    current.errors.wb=e.message;setStatus("s-wb","fail","Wayback: unavailable");renderWayback();renderLifecycle();renderTimeline();
+  });
+
+ setTimeout(()=>{
+   if(current?.domain===d&&current.loading){
+     current.loading=false;renderQuickSummary();
+     $("#qsNext").innerHTML=`<b>${esc(T("next"))}:</b> ${esc(LANG==="ko"?"완료된 결과부터 표시했습니다. 느린 소스는 기다리지 않습니다.":"Available results are shown now; slow sources no longer block the page.")}`;
+   }
+ },16000);
+
+ loadSaved();
 }
 
 function renderAll(){renderQuickSummary();renderSignals();renderRegistration();renderLifecycle();renderTimeline();renderInfrastructure();renderWayback();if(parsedHeader)renderHeaderComparison()}
