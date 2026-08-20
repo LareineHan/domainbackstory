@@ -1,7 +1,7 @@
 {
   "name": "domain-backstory",
   "private": true,
-  "version": "15.0.0",
+  "version": "16.0.0",
   "devDependencies": {
     "wrangler": "^4.0.0"
   },

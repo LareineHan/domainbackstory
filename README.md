@@ -1,11 +1,13 @@
-# Domain Backstory v15
+# Domain Backstory v16 — stable rewrite
 
-Fixes the apparent endless loading:
-- core sources render independently;
-- DNS can finish even if RDAP is slow;
-- Wayback no longer blocks the page;
-- browser-side timeouts were added;
-- RDAP retry chain was shortened;
-- the global loader ends after the two core requests or at 16 seconds.
+This version removes the fragile global-loading logic.
 
-Frontend and Worker JavaScript syntax checks passed.
+- Every source has a hard browser timeout.
+- Registration and DNS render independently.
+- The top progress bar ends as soon as the two core sources finish.
+- Wayback is enrichment and never blocks core results.
+- No source can keep the entire page in loading state forever.
+- Korean/English UI and top buttons are retained.
+- Raw header parsing remains browser-only.
+
+Both frontend and Worker JavaScript are syntax-checked before packaging.
