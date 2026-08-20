@@ -1,24 +1,16 @@
-# Domain Backstory v13 — UI redesign
+# Domain Backstory v14 — Loading UX
 
-## What changed
-- Full UI redesign for faster scanning.
-- Korean is the default and is fully supported across static labels and main dynamic analysis text.
-- Fixed Korean wrapping: `word-break: keep-all`, `white-space: nowrap` on buttons, and a wider language toggle.
-- Korean / English toggle remains persistent in localStorage.
-- Strong top-level summary with a clear **Next step**.
-- Raw technical data is de-emphasized and collapsible where possible.
-- Current Infrastructure is shown as four analyst-friendly cards:
-  - Web / host destination
-  - Inbound mail routing
-  - SPF outbound clues
-  - DNS management
-- Header findings use the selected language.
-- Registration, lifecycle, timeline, reputation pivots, notes, and top buttons are retained.
-- Floating ↑ and bottom ↑ Back to top are both retained.
+## Changes
+- Immediate animated loading state as soon as Investigate is clicked.
+- Rotating cube loader in the quick summary and major data cards.
+- Animated progress bar and loading dots.
+- Quick Summary no longer keeps showing "Enter a domain" while requests are running.
+- After 12 seconds, the UI explains that a public source may be slow instead of looking frozen.
+- Existing Korean / English UI, floating top button, and bottom Back to top button are retained.
 
 ## Validation
 - Frontend JavaScript syntax: PASS
 - Worker JavaScript syntax: PASS
 
 ## Deploy
-Replace the existing GitHub repo contents with this package and push.
+Replace your existing repo contents with this package and push.
