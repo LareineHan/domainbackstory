@@ -36,7 +36,7 @@ function parseRdap(x,domain,source){
   if(e.eventAction&&e.eventDate&&!ev[e.eventAction])ev[e.eventAction]=e.eventDate;
  }
  let registrar=null,iana=null;
- for(const en of(x.entities||[]){
+ for(const en of (x.entities||[])){
   if(!(en.roles||[]).includes("registrar"))continue;
   for(const i of(en.vcardArray?.[1]||[]))if(i[0]==="fn"&&!registrar)registrar=i[3];
   for(const id of(en.publicIds||[]))if((id.type||"").toLowerCase().includes("iana"))iana=id.identifier;

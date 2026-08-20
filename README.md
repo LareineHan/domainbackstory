@@ -1,3 +1,7 @@
+# Domain Backstory v11.1 — build fix
+
+Validated with `node --check` before packaging.
+
 # Domain Backstory v11
 
 ## Registration fallback improvements
