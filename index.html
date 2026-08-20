@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Domain Backstory</title>
+<style>
+:root{--bg:#0d0d12;--panel:#171721;--line:#333044;--text:#f4f2ff;--muted:#aaa5bd;--accent:#a786ff;--good:#7fdfb0;--warn:#ffd37a;--bad:#ff8a9a}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}
+.wrap{max-width:1050px;margin:auto;padding:32px 18px 70px} h1{margin:0 0 8px;font-size:34px}.sub{color:var(--muted);line-height:1.5}
+.search{display:flex;gap:10px;margin:24px 0;background:var(--panel);border:1px solid var(--line);padding:14px;border-radius:16px}
+input,select,textarea,button{font:inherit} input{flex:1;background:#101018;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:12px}
+button{background:var(--accent);border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}.full{grid-column:1/-1}
+h2{font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:#d8d2ef;margin:0 0 14px}.muted{color:var(--muted);font-size:13px}
+.kv{display:grid;grid-template-columns:140px 1fr;gap:8px 12px;font-size:14px}.k{color:var(--muted)} table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;border-bottom:1px solid var(--line);padding:8px}.flag{padding:10px 0;border-bottom:1px solid var(--line)}.good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+textarea,select{width:100%;background:#101018;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px} textarea{min-height:110px}
+@media(max-width:720px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.search{flex-wrap:wrap}.search input{min-width:100%}}
+</style>
+</head>
+<body><div class="wrap">
+<h1>Domain Backstory</h1>
+<div class="sub">Passive context for suspicious sender domains: RDAP, Certificate Transparency, and Wayback history. It highlights clues, not “proof of compromise.”</div>
+
+<div class="search"><input id="domain" placeholder="example.com or paste an email / URL"><button id="go">Investigate</button></div>
+
+<div class="grid">
+<div class="card"><h2>Analyst clues</h2><div id="summary" class="muted">Enter a domain to begin.</div></div>
+<div class="card"><h2>Domain identity · RDAP</h2><div id="rdap" class="muted">Waiting…</div></div>
+<div class="card"><h2>Certificate Transparency</h2><div id="ct" class="muted">Waiting…</div></div>
+<div class="card"><h2>Web history · Wayback</h2><div id="wb" class="muted">Waiting…</div></div>
+<div class="card full"><h2>Analyst notes</h2>
+<select id="disp"><option>No disposition yet</option><option>Likely attacker-registered</option><option>Possible legitimate account/service compromise</option><option>Possible domain/infrastructure takeover</option><option>Likely legitimate service abuse</option><option>Benign / insufficient evidence</option><option>Needs more investigation</option></select>
+<textarea id="notes" placeholder="Your observations..."></textarea>
+<button id="save" style="margin-top:10px">Save locally</button> <span id="saved" class="muted"></span>
+</div></div></div>
+
+<script>
+const $=s=>document.querySelector(s); let current=null;
+function clean(x){x=(x||"").trim().toLowerCase();if(x.includes("@")&&!x.includes("://"))x=x.split("@").pop();try{if(x.includes("://"))x=new URL(x).hostname}catch{}return x.split("/")[0].split(":")[0]}
+function fmt(x){if(!x)return"—";let d=new Date(x);return isNaN(d)?x:d.toLocaleDateString()}
+function days(x){let d=new Date(x);return isNaN(d)?null:Math.floor((Date.now()-d)/86400000)}
+async function get(p){let r=await fetch(p);let j=await r.json();if(!r.ok)throw new Error(j.error||r.status);return j}
+function kv(obj){return '<div class="kv">'+Object.entries(obj).map(([k,v])=>`<div class="k">${k}</div><div>${v??"—"}</div>`).join("")+'</div>'}
+async function run(){
+ let d=clean($("#domain").value); if(!d.includes("."))return alert("Enter a valid domain.");
+ $("#domain").value=d; current={domain:d,rdap:null,ct:null,wb:null}; ["rdap","ct","wb"].forEach(id=>$("#"+id).textContent="Looking up…");
+ const jobs=[
+ get("/api/rdap?domain="+encodeURIComponent(d)).then(x=>{current.rdap=x;$("#rdap").innerHTML=kv({"Registered":fmt(x.registered),"Last changed":fmt(x.last_changed),"Registrar":x.registrar||"—","Nameservers":(x.nameservers||[]).join(", ")||"—"})}).catch(e=>$("#rdap").textContent=e.message),
+ get("/api/ct?domain="+encodeURIComponent(d)).then(x=>{current.ct=x;$("#ct").innerHTML=kv({"Unique certs":x.unique_certificates,"Unique hostnames":x.unique_names,"Newest":fmt(x.newest),"Oldest":fmt(x.oldest)})+(x.recent_names||[]).slice(0,8).map(n=>`<div class="muted">${n.name} · ${fmt(n.date)}</div>`).join("")}).catch(e=>$("#ct").textContent=e.message),
+ get("/api/wayback?domain="+encodeURIComponent(d)).then(x=>{current.wb=x;$("#wb").innerHTML=kv({"Snapshots":x.count,"First observed":fmt(x.first),"Last observed":fmt(x.last)})+(x.sample||[]).map(r=>`<div class="muted"><a style="color:#bcaaff" target="_blank" href="${r.archive_url}">${fmt(r.date)}</a> · ${r.url}</div>`).join("")}).catch(e=>$("#wb").textContent=e.message)
+ ];
+ await Promise.allSettled(jobs); clues(); loadSaved(d);
+}
+function clues(){
+ let f=[]; let r=current.rdap,c=current.ct,w=current.wb;
+ if(r?.registered){let n=days(r.registered); if(n!==null&&n<90)f.push(`<div class="flag bad">Recently registered (${n} days ago)</div>`); else if(n!==null&&n>1825)f.push(`<div class="flag good">Long-established domain (~${Math.floor(n/365.25)} years)</div>`)}
+ if(r?.last_changed){let n=days(r.last_changed);if(n!==null&&n<60)f.push(`<div class="flag warn">Recent RDAP change (${n} days ago)</div>`)}
+ if(c?.newest){let n=days(c.newest);if(n!==null&&n<45)f.push(`<div class="flag warn">Recent certificate activity (${n} days ago)</div>`)}
+ if(w?.first)f.push(`<div class="flag good">Historical web presence since ${fmt(w.first)}</div>`);
+ $("#summary").innerHTML=(f.join("")||'<div class="muted">No strong public-context clue found.</div>')+'<div class="muted" style="margin-top:12px">These clues support hypotheses only; they do not confirm compromise.</div>';
+}
+function key(){return"domainBackstory:"+$("#domain").value}
+function loadSaved(){let x=JSON.parse(localStorage.getItem(key())||"null");if(x){$("#disp").value=x.disp;$("#notes").value=x.notes}}
+$("#go").onclick=run;$("#domain").onkeydown=e=>{if(e.key==="Enter")run()}
+$("#save").onclick=()=>{localStorage.setItem(key(),JSON.stringify({disp:$("#disp").value,notes:$("#notes").value}));$("#saved").textContent=" Saved in this browser."}
+</script></body></html>
